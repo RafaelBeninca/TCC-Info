@@ -1,25 +1,16 @@
-import { useState } from 'react'
+import * as ReactDom from "react-dom/client"
+import Login from './pages/Login'
+import Register from './pages/Register'
+import AuthDetails from './contexts/authContext/AuthDetails'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
-    <>
       <div>
+        <Register/>
+        <AuthDetails/>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
   )
 }
 
