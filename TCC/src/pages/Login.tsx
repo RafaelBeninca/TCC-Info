@@ -1,5 +1,5 @@
 import { doSignInWithEmailAndPassword, doSignInWithGoogle } from "../contexts/authContext/Auth";
-import { Navigate } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from "../contexts/authContext/Index";
 import { useState } from "react";
 
@@ -55,6 +55,7 @@ const Login = () => {
                 </input>
                 <button type="submit">Logar</button>
             </form>
+            <Outlet/>
         </div>
     )
 }
