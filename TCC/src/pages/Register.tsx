@@ -1,5 +1,5 @@
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { Navigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from "../contexts/authContext/Index";
 import { auth } from '../contexts/firebase/firebaseConfig';
 import { useState } from "react";
@@ -12,6 +12,7 @@ const Register = () => {
     const [password, setPassword] = useState('')
     const [isSigningIn, setIsSigningIn] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
+    const navigate = useNavigate()
 
     const signUp = async (e: any) => {
         e.preventDefault()
@@ -21,6 +22,7 @@ const Register = () => {
             .then((userCredential: any) => {
                 console.log("sucesso :)")
                 console.log(userCredential);
+                navigate('/')
             })
             .catch((error: any) => {
                 console.log("caca")

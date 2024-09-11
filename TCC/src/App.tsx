@@ -5,7 +5,8 @@ import { Routes, Route } from "react-router-dom"
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Home from "./pages/Home"
-import AuthDetails from './contexts/authContext/AuthDetails'
+import AuthDetails from './components/AuthDetails'
+import Error from "./pages/Error"
 
 function App() {
 
@@ -17,6 +18,7 @@ function App() {
           <Route index element={<AuthDetails/>}/>
         </Route>
         <Route path="/register" element={<Register/>}/>
+        <Route path="*" element={<Error />}/>
       </Routes>
     </BrowserRouter>
   )

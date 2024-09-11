@@ -1,5 +1,5 @@
 import { doSignInWithEmailAndPassword, doSignInWithGoogle } from "../contexts/authContext/Auth";
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from "../contexts/authContext/Index";
 import { useState } from "react";
 
@@ -12,6 +12,7 @@ const Login = () => {
     const [password, setPassword] = useState('')
     const [isSigningIn, setIsSigningIn] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
+    const navigate = useNavigate()
 
     const signIn = async (e: any) => {
         e.preventDefault()
@@ -21,6 +22,7 @@ const Login = () => {
             .then((userCredential) => {
                 console.log("sucesso :)")
                 console.log(userCredential);
+                navigate('/')
             })
             .catch((error) => {
                 console.log("caca")
