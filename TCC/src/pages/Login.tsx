@@ -2,6 +2,7 @@ import { doSignInWithEmailAndPassword, doSignInWithGoogle } from "../contexts/au
 import { Navigate, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from "../contexts/authContext/Index";
 import { useState } from "react";
+import './../index.css'
 
 
 const Login = () => {
