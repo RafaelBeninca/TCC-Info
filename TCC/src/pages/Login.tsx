@@ -43,23 +43,25 @@ const Login = () => {
     }
 
     return (
-        <div>
-            {userLoggedIn && (<Navigate to={'/Home'} replace={true} />)}
-            <form onSubmit={signIn}>
-                <h1>Login</h1>
-                Senha:<input type="text" 
-                    placeholder="Senha"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}>
-                </input><br/>
-                Email:<input type="text"
-                    placeholder="Email"
-                    value={email} onChange={(e) => setEmail(e.target.value)}>
-                </input>
-                <button type="submit">Logar</button>
-            </form>
-            <Outlet/>
-        </div>
+        <>
+            <div className="max-w-screen-x1 flex flex-wrap items-center justify-between mx-auto p-2 bg-yellow-300">
+                {userLoggedIn && (<Navigate to={'/Home'} replace={true} />)}
+                <form onSubmit={signIn}>
+                    <h1>Login</h1>
+                    Senha:<input type="text" 
+                        placeholder="Senha"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}>
+                    </input><br/>
+                    Email:<input type="text"
+                        placeholder="Email"
+                        value={email} onChange={(e) => setEmail(e.target.value)}>
+                    </input>
+                    <button type="submit">Logar</button>
+                </form>
+                <Outlet/>
+            </div>
+        </>
     )
 }
 
