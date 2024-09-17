@@ -33,7 +33,7 @@ const Register = () => {
 
     return (
         <div>
-            {userLoggedIn && (<Navigate to={'/Home'} replace={true} />)}
+            {userLoggedIn && (<Navigate to={'/'} replace={true} />)}
             <form onSubmit={signUp}>
                 <h1>Registrar</h1>
                 Senha:<input type="text" 

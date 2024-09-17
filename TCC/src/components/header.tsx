@@ -5,6 +5,7 @@ import { doSignOut } from "../contexts/authContext/Auth";
 import mal from "../assets/images/mal.png"
 import blankpfp from "../assets/images/blankpfp.jpg"
 import { User } from "firebase/auth";
+import { auth } from "../contexts/firebase/firebaseConfig";
 
 const Header = () => {
     const [authUser, setAuthUser] = useState<User | null>(null);
@@ -40,7 +41,7 @@ const Header = () => {
             </div>
             <a href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
             <img src={blankpfp} className="w-10 h-10 rounded-full" alt="Rounded avatar" />
-            <p>Usuário</p>
+            <p>{auth.currentUser ? auth.currentUser?.email : "Sem conta"}</p>
             </a>
         </div>
         </nav>
