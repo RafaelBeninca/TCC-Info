@@ -1,16 +1,10 @@
-import React, { useState } from "react";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/authContext/Index";
-import { doSignOut } from "../contexts/authContext/Auth";
 import mal from "../assets/images/mal.png"
 import blankpfp from "../assets/images/blankpfp.jpg"
-import { User } from "firebase/auth";
 import { auth } from "../contexts/firebase/firebaseConfig";
 
 const Header = () => {
-    const [authUser, setAuthUser] = useState<User | null>(null);
-
-    const navigate = useNavigate()
     const { userLoggedIn } = useAuth()
     return (
         <>

@@ -1,48 +1,58 @@
 import { useState, useEffect, useContext } from "react";
-import { auth } from "../firebase/firebaseConfig"
-import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebase/firebaseConfig";
+import { onAuthStateChanged, User } from "firebase/auth";
 import React from "react";
 
-const AuthContext = React.createContext({});
+interface IAuthContext {
+  currentUser: User | null;
+  userLoggedIn: boolean;
+  loading: boolean;
+}
+
+const AuthContext = React.createContext<IAuthContext>({
+  currentUser: null,
+  userLoggedIn: false,
+  loading: false
+});
 
 export function useAuth() {
-    return useContext(AuthContext);
+  return useContext(AuthContext);
 }
 
 interface AuthProviderProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
-export function AuthProvider({children}: AuthProviderProps) {
-    const [currentUser, setCurrentUser] = useState(null);
-    const [userLoggedIn, setUserLoggedIn] = useState(false);
-    const [loading, setLoading] = useState(true);
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [userLoggedIn, setUserLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(()=>{
-        const unsubscribe = onAuthStateChanged(auth, initializeUser);
-        return unsubscribe;
-    }, [])
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, initializeUser);
+    return unsubscribe;
+  }, []);
 
-    async function initializeUser(user: any) {
-        if (user) {
-            setCurrentUser({...user});
-            setUserLoggedIn(true);
-        } else {
-            setCurrentUser(null);
-            setUserLoggedIn(false);
-        }
-        setLoading(false);
+  async function initializeUser(user: User | null) {
+    if (user) {
+      setCurrentUser({ ...user });
+      setUserLoggedIn(true);
+    } else {
+      setCurrentUser(null);
+      setUserLoggedIn(false);
     }
+    setLoading(false);
+  }
 
-    const value = {
-        currentUser,
-        userLoggedIn,
-        loading
-    }
+  const value = {
+    currentUser,
+    userLoggedIn,
+    loading,
+  };
 
-    return (
-        <AuthContext.Provider value={value}>
-            {!loading && children}
-        </AuthContext.Provider>
-    )
+  return (
+    <AuthContext.Provider value={value}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
 }
