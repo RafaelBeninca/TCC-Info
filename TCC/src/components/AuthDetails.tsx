@@ -1,11 +1,12 @@
-import { User, getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { User, onAuthStateChanged, signOut } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { auth } from "../contexts/firebase/firebaseConfig";
-import { Navigate, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/authContext/Index";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/authContext";
 
 const AuthDetails = () => {
     const [authUser, setAuthUser] = useState<User | null>(null);
+    const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate()
     const { userLoggedIn } = useAuth()
 
@@ -29,10 +30,6 @@ const AuthDetails = () => {
             console.log('Deslogado com sucesso!')
             navigate('/login')
         }).catch(error => console.log(error));
-    }
-
-    const userDelete = () => {
-        const [error, setError] = useState(null);
     }
 
     const handleDeleteAccount = () => {
