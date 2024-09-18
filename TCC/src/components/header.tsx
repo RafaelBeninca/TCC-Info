@@ -14,23 +14,23 @@ const Header = () => {
   const dropRef = useRef<HTMLDivElement | null>(null);
 
   const toggleDropdown = () => {
-    setDropdownIsOpen(!dropdownIsOpen)
+    setDropdownIsOpen(!dropdownIsOpen);
   };
 
   const handleClicksOutside = (event: MouseEvent) => {
     if (dropRef.current && !dropRef.current.contains(event.target as Node)) {
-      setDropdownIsOpen(false)
-    };
+      setDropdownIsOpen(false);
+    }
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClicksOutside);
+    document.addEventListener("mousedown", handleClicksOutside);
     return () => {
-      document.addEventListener('mousedown', handleClicksOutside);
+      document.addEventListener("mousedown", handleClicksOutside);
     };
-  }, [])
+  }, []);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
     const listen = onAuthStateChanged(auth, (user) => {
@@ -112,74 +112,102 @@ const Header = () => {
               />
               <p>{auth.currentUser ? auth.currentUser?.email : "Sem conta"}</p>
             </button>
-            {authUser && dropdownIsOpen && (
+            {dropdownIsOpen && (
               <div className="absolute bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
                 <div className="py-1">
-                  <a
-                    href="/usuario"
-                    className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    <svg
-                      className="w-6 h-6 mr-3 text-gray-800 dark:text-white"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
+                  {authUser ? (
+                    <>
+                      <a
+                        href="/usuario"
+                        className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <svg
+                          className="w-6 h-6 mr-3 text-gray-800 dark:text-white"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z"
+                            clip-rule="evenodd"
+                          />
+                        </svg>
+                        Usuário
+                      </a>
+                      <a
+                        href="/opcoes"
+                        className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <svg
+                          className="w-6 h-6 mr-3 text-gray-800 dark:text-white"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M9.586 2.586A2 2 0 0 1 11 2h2a2 2 0 0 1 2 2v.089l.473.196.063-.063a2.002 2.002 0 0 1 2.828 0l1.414 1.414a2 2 0 0 1 0 2.827l-.063.064.196.473H20a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-.089l-.196.473.063.063a2.002 2.002 0 0 1 0 2.828l-1.414 1.414a2 2 0 0 1-2.828 0l-.063-.063-.473.196V20a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-.089l-.473-.196-.063.063a2.002 2.002 0 0 1-2.828 0l-1.414-1.414a2 2 0 0 1 0-2.827l.063-.064L4.089 15H4a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h.09l.195-.473-.063-.063a2 2 0 0 1 0-2.828l1.414-1.414a2 2 0 0 1 2.827 0l.064.063L9 4.089V4a2 2 0 0 1 .586-1.414ZM8 12a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"
+                            clip-rule="evenodd"
+                          />
+                        </svg>
+                        Opções
+                      </a>
+                      <button
+                        onClick={userSignOut}
+                        className="flex px-4 py-2 w-full text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <svg
+                          className="w-6 h-6 mr-3 text-gray-800 dark:text-white"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"
+                          />
+                        </svg>
+                        Sair
+                      </button>{" "}
+                    </>
+                  ) : (
+                    <a
+                      href="/login"
+                      className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
-                      <path
-                        fill-rule="evenodd"
-                        d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                    Usuário
-                  </a>
-                  <a
-                    href="/opcoes"
-                    className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    <svg
-                      className="w-6 h-6 mr-3 text-gray-800 dark:text-white"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M9.586 2.586A2 2 0 0 1 11 2h2a2 2 0 0 1 2 2v.089l.473.196.063-.063a2.002 2.002 0 0 1 2.828 0l1.414 1.414a2 2 0 0 1 0 2.827l-.063.064.196.473H20a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-.089l-.196.473.063.063a2.002 2.002 0 0 1 0 2.828l-1.414 1.414a2 2 0 0 1-2.828 0l-.063-.063-.473.196V20a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-.089l-.473-.196-.063.063a2.002 2.002 0 0 1-2.828 0l-1.414-1.414a2 2 0 0 1 0-2.827l.063-.064L4.089 15H4a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h.09l.195-.473-.063-.063a2 2 0 0 1 0-2.828l1.414-1.414a2 2 0 0 1 2.827 0l.064.063L9 4.089V4a2 2 0 0 1 .586-1.414ZM8 12a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                    Opções
-                  </a>
-                  <button
-                    onClick={userSignOut}
-                    className="flex px-4 py-2 w-full text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    <svg
-                      className="w-6 h-6 mr-3 text-gray-800 dark:text-white"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"
-                      />
-                    </svg>
-                    Sair
-                  </button>
+                      <svg
+                        className="w-6 h-6 mr-3 text-gray-800 dark:text-white"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M16 12H4m12 0-4 4m4-4-4-4m3-4h2a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3h-2"
+                        />
+                      </svg>
+                      Login
+                    </a>
+                  )}
                 </div>
               </div>
             )}

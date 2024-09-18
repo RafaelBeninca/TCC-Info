@@ -52,7 +52,7 @@ const Login = () => {
   return (
     <div className="">
       <div
-        className="border-4 rounded-lg w-1/4 mx-auto"
+        className="border-4 rounded-lg px-10 w-1/3 mx-auto"
         style={{ marginTop: "5%", paddingBottom: "5%" }}
       >
         <form className="max-w-sm mx-auto mt-20" onSubmit={signIn}>
@@ -73,7 +73,7 @@ const Login = () => {
           <div className="mb-5">
             Senha:
             <input
-              type="text"
+              type="password"
               className="block mb-2 border-2 pl-2 text-sm font-medium text-gray-900 dark:text-white py-2"
               style={{ width: "70%" }}
               placeholder="Digite sua senha"

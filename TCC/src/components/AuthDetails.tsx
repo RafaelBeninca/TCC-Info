@@ -48,7 +48,6 @@ const AuthDetails = () => {
 
     return (
         <div>
-            {authUser ? <><p>{`Logado como ${authUser.email}`}</p><button onClick={userSignOut}>Deslogar</button> </> : <> <p>Não Logado</p></>}<br/>
             <button onClick={handleDeleteAccount}>Delete My Account</button>
         </div>
     )
