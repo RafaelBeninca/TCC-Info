@@ -3,15 +3,33 @@ import { useAuth } from "../contexts/authContext";
 import mal from "../assets/images/mal.png";
 import blankpfp from "../assets/images/blankpfp.jpg";
 import { auth } from "../contexts/firebase/firebaseConfig";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 
 const Header = () => {
   const [authUser, setAuthUser] = useState<User | null>(null);
-  const [dropdownIsOpen, setDropdownIsOpen] = useState(false);
+  const [dropdownIsOpen, setDropdownIsOpen] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const toggleDropdown = () => setDropdownIsOpen((prev) => !prev);
+  const dropRef = useRef<HTMLDivElement | null>(null);
+
+  const toggleDropdown = () => {
+    setDropdownIsOpen(!dropdownIsOpen)
+  };
+
+  const handleClicksOutside = (event: MouseEvent) => {
+    if (dropRef.current && !dropRef.current.contains(event.target as Node)) {
+      setDropdownIsOpen(false)
+    };
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClicksOutside);
+    return () => {
+      document.addEventListener('mousedown', handleClicksOutside);
+    };
+  }, [])
+
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -36,27 +54,6 @@ const Header = () => {
       })
       .catch((error) => console.log(error));
   };
-
-  const handleDeleteAccount = () => {
-    const user = auth.currentUser;
-    if (user) {
-      user
-        .delete()
-        .then(() => {
-          console.log("Conta deletada com sucesso.");
-          navigate("/login");
-        })
-        .catch((error) => {
-          setError(error.message);
-        });
-    }
-  };
-
-  if (auth.currentUser) {
-    console.log(auth.currentUser?.email);
-  } else {
-    console.log("Usuário sem login");
-  }
   const { userLoggedIn } = useAuth();
   return (
     <>
@@ -100,7 +97,7 @@ const Header = () => {
               </li>
             </ul>
           </div>
-          <div>
+          <div ref={dropRef}>
             <button
               onClick={toggleDropdown}
               id="dropdownDefaultButton"
