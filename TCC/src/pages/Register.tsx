@@ -1,32 +1,42 @@
-import { createUserWithEmailAndPassword, UserCredential } from "firebase/auth";
+import { createUserWithEmailAndPassword, onAuthStateChanged, UserCredential } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/authContext";
-import { auth } from "../contexts/firebase/firebaseConfig";
+import { auth, db } from "../contexts/firebase/firebaseConfig";
 import { FormEvent, useState } from "react";
 import { FormUser } from "../components/Interfaces";
-import createUser from "../components/firestoreService";
+import { addDoc, collection } from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
 
 const Register = () => {
   const { userLoggedIn } = useAuth();
+  const userCollectionRef = collection(db, "user");
 
   const [user, setUser] = useState<FormUser>({
     name: "",
     email: "",
     password: "",
-  })
+  });
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
+
+  let uid:string
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      uid = user.uid
+    }
+  })
 
   const signUp = async (e: FormEvent) => {
     e.preventDefault();
     if (!isSigningIn) {
       setIsSigningIn(true);
       await createUserWithEmailAndPassword(auth, user.email, user.password)
-        .then((userCredential: UserCredential) => {
+        .then( async (userCredential: UserCredential) => {
           console.log("sucesso :)");
           console.log(userCredential);
+          const docRef = await addDoc(userCollectionRef, { name: user.name, uid});
+          console.log(docRef.id);
           navigate("/");
         })
         .catch((error: FirebaseError) => {
@@ -54,7 +64,7 @@ const Register = () => {
               style={{ width: "70%" }}
               placeholder="Digite seu nome"
               value={user.name}
-              onChange={(e) => setUser({...user, name: e.target.value})}
+              onChange={(e) => setUser({ ...user, name: e.target.value })}
             ></input>
             Email:
             <input
@@ -63,7 +73,7 @@ const Register = () => {
               style={{ width: "70%" }}
               placeholder="Digite seu E-mail"
               value={user.email}
-              onChange={(e) => setUser({...user, email: e.target.value})}
+              onChange={(e) => setUser({ ...user, email: e.target.value })}
             ></input>
           </div>
           <div className="mb-5">
@@ -74,7 +84,7 @@ const Register = () => {
               style={{ width: "70%" }}
               placeholder="Digite sua senha"
               value={user.password}
-              onChange={(e) => setUser({...user, password: e.target.value})}
+              onChange={(e) => setUser({ ...user, password: e.target.value })}
             ></input>
             <a
               href="/login"

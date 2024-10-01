@@ -2,13 +2,15 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/authContext";
 import mal from "../assets/images/mal.png";
 import blankpfp from "../assets/images/blankpfp.jpg";
-import { auth } from "../contexts/firebase/firebaseConfig";
+import { auth, db } from "../contexts/firebase/firebaseConfig";
 import { useEffect, useRef, useState } from "react";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 const Header = () => {
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [dropdownIsOpen, setDropdownIsOpen] = useState<boolean>(false);
+  const [name, setName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const dropRef = useRef<HTMLDivElement | null>(null);
@@ -33,8 +35,15 @@ const Header = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const listen = onAuthStateChanged(auth, (user) => {
+    let uid: string;
+    const listen = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        uid = user.uid;
+        const userRef = collection(db, "user");
+        const q = query(userRef, where("uid", "==", uid));
+        const querySnapshot = await getDocs(q);
+
+        setName(querySnapshot.docs[0].data().name)
         setAuthUser(user);
       } else {
         setAuthUser(null);
@@ -102,7 +111,7 @@ const Header = () => {
                 className="w-10 h-10 rounded-full"
                 alt="Rounded avatar"
               />
-              <p>{auth.currentUser ? auth.currentUser?.email : "Sem conta"}</p>
+              <p>{auth.currentUser ? name : "Sem conta"}</p>
             </button>
             {dropdownIsOpen && (
               <div className="absolute bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
