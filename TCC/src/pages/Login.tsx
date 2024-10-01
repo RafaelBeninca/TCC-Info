@@ -6,17 +6,25 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/authContext";
 import { useState } from "react";
 import "./../index.css";
+import { FormUser } from "../components/Interfaces";
 
 const Login = () => {
   const { userLoggedIn } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [user, setUser] = useState<Omit<FormUser, "name">>({
+    email: "",
+    password: "",
+  })
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  // const [errorMessage, setErrorMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // const handleCreateUser = async () => {
+  //   if (!user.password || !user.email) return;
+  //   await createUser(user);
+  // }
 
   const signIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,7 +34,7 @@ const Login = () => {
     if (!isSigningIn) {
       setIsSigningIn(true);
       setLoading(false);
-      await doSignInWithEmailAndPassword(email, password)
+      await doSignInWithEmailAndPassword(user.email, user.password)
         .then((userCredential) => {
           console.log("sucesso :)");
           console.log(userCredential);
@@ -66,8 +74,8 @@ const Login = () => {
               className="block mb-2 border-2 pl-2 text-sm font-medium text-gray-900 dark:text-white py-2"
               style={{ width: "70%" }}
               placeholder="Digite seu E-mail"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={user.email}
+              onChange={(e) => setUser({...user, email: e.target.value})}
             ></input>
           </div>
           <div className="mb-5">
@@ -77,8 +85,8 @@ const Login = () => {
               className="block mb-2 border-2 pl-2 text-sm font-medium text-gray-900 dark:text-white py-2"
               style={{ width: "70%" }}
               placeholder="Digite sua senha"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={user.password}
+              onChange={(e) => setUser({...user, password: e.target.value})}
             ></input>
             <a
               href="/register"

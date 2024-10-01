@@ -1,29 +1,35 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, UserCredential } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/authContext";
 import { auth } from "../contexts/firebase/firebaseConfig";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
+import { FormUser } from "../components/Interfaces";
+import createUser from "../components/firestoreService";
+import { FirebaseError } from "firebase/app";
 
 const Register = () => {
   const { userLoggedIn } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [user, setUser] = useState<FormUser>({
+    name: "",
+    email: "",
+    password: "",
+  })
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
-  const signUp = async (e: any) => {
+  const signUp = async (e: FormEvent) => {
     e.preventDefault();
     if (!isSigningIn) {
       setIsSigningIn(true);
-      await createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential: any) => {
+      await createUserWithEmailAndPassword(auth, user.email, user.password)
+        .then((userCredential: UserCredential) => {
           console.log("sucesso :)");
           console.log(userCredential);
           navigate("/");
         })
-        .catch((error: any) => {
+        .catch((error: FirebaseError) => {
           console.log("caca");
           console.log(error);
         });
@@ -41,14 +47,23 @@ const Register = () => {
             Registro
           </span>
           <div className="mb-5 mt-10">
+            Nome:
+            <input
+              type="text"
+              className="block mb-4 border-2 pl-2 text-sm font-medium text-gray-900 dark:text-white py-2"
+              style={{ width: "70%" }}
+              placeholder="Digite seu nome"
+              value={user.name}
+              onChange={(e) => setUser({...user, name: e.target.value})}
+            ></input>
             Email:
             <input
               type="text"
               className="block mb-2 border-2 pl-2 text-sm font-medium text-gray-900 dark:text-white py-2"
               style={{ width: "70%" }}
               placeholder="Digite seu E-mail"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={user.email}
+              onChange={(e) => setUser({...user, email: e.target.value})}
             ></input>
           </div>
           <div className="mb-5">
@@ -58,8 +73,8 @@ const Register = () => {
               className="block mb-2 border-2 pl-2 text-sm font-medium text-gray-900 dark:text-white py-2"
               style={{ width: "70%" }}
               placeholder="Digite sua senha"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={user.password}
+              onChange={(e) => setUser({...user, password: e.target.value})}
             ></input>
             <a
               href="/login"
