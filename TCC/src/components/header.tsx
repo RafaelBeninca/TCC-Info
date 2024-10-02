@@ -6,6 +6,7 @@ import { auth, db } from "../contexts/firebase/firebaseConfig";
 import { useEffect, useRef, useState } from "react";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { collection, getDocs, query, where } from "firebase/firestore";
+import { Avatar, DarkThemeToggle } from "flowbite-react";
 
 const Header = () => {
   const [authUser, setAuthUser] = useState<User | null>(null);
@@ -43,7 +44,7 @@ const Header = () => {
         const q = query(userRef, where("uid", "==", uid));
         const querySnapshot = await getDocs(q);
 
-        setName(querySnapshot.docs[0].data().name)
+        setName(querySnapshot.docs[0].data().name);
         setAuthUser(user);
       } else {
         setAuthUser(null);
@@ -60,6 +61,7 @@ const Header = () => {
       .then(() => {
         console.log("Deslogado com sucesso!");
         navigate("/login");
+        toggleDropdown();
       })
       .catch((error) => console.log(error));
   };
@@ -98,6 +100,7 @@ const Header = () => {
               </li>
             </ul>
           </div>
+          <DarkThemeToggle/>
           <div ref={dropRef}>
             <button
               onClick={toggleDropdown}
@@ -106,12 +109,12 @@ const Header = () => {
               className="flex items-center space-x-3 rtl:space-x-reverse"
               type="button"
             >
-              <img
-                src={blankpfp}
+              <Avatar rounded
+                img={blankpfp}
                 className="w-10 h-10 rounded-full"
-                alt="Rounded avatar"
+                alt="Profile"
               />
-              <p>{auth.currentUser ? name : "Sem conta"}</p>
+              <p className="text-textcolor-dark hover:text-textcolor-lightHover dark:text-textcolor-light dark:hover:text-textcolor-darkHover">{auth.currentUser ? name : "Sem conta"}</p>
             </button>
             {dropdownIsOpen && (
               <div className="absolute bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
