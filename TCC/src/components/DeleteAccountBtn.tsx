@@ -1,18 +1,17 @@
-import { User, onAuthStateChanged } from "firebase/auth";
+import { Auth, User, deleteUser, onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
-import { auth } from "../contexts/firebase/firebaseConfig";
+import { auth, db } from "../contexts/firebase/firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/authContext";
-import { Button, Flowbite, Modal } from "flowbite-react";
+import { Button, Modal } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
-import customTheme from "./Theme";
+import { collection, deleteDoc, doc, Firestore, getDocs, query, where } from "firebase/firestore";
 
-const DeleteAccountBtn = () => {
+const DeleteAccountBtn: React.FC<{ uid: string}> = ({ uid }) => {
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [openModal, setOpenModal] = useState<boolean>(true);
+  const [openModal, setOpenModal] = useState<boolean>(false);
   const navigate = useNavigate();
-  const { userLoggedIn } = useAuth();
 
   useEffect(() => {
     const listen = onAuthStateChanged(auth, (user) => {
@@ -28,30 +27,51 @@ const DeleteAccountBtn = () => {
     };
   }, []);
 
-  const handleDeleteAccount = () => {
-    const user = auth.currentUser;
-    if (user) {
-      user
-        .delete()
-        .then(() => {
-          console.log("Conta deletada com sucesso.");
-          navigate("/login");
-        })
-        .catch((error) => {
-          setError(error.message);
-        });
+
+
+  async function handleDeleteAccount(uid: string, auth: Auth, db: Firestore): Promise<void> {
+    try {
+
+      const userRef = collection(db, "user");
+      const q = query(userRef, where("authUid", "==", uid));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty && querySnapshot.docs[0]) {
+        const userDoc = querySnapshot.docs[0];
+        const userDocRef = doc(db, "user", userDoc.id);
+        await deleteDoc(userDocRef);
+        console.log("Firestore document deleted successfuly.")
+      } else {
+        console.log("Error in deleting the Firestore document.")
+      }
+  
+      const user = auth.currentUser;
+      if (user && user.uid === uid) {
+        await deleteUser(user);
+        console.log(`User ${uid} deleted successfully from Firebase Authentication.`);
+        navigate("/login");
+      } else {
+        console.error(`No authenticated user found or user ID mismatch.`);
+      }
+    } catch (error) {
+      console.error("Error deleting user or document:", error);
     }
-  };
+  }
 
   return (
-    <Flowbite theme={customTheme}>
+    <>
       <Button
         onClick={() => setOpenModal(true)}
         className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
       >
         Teste
       </Button>
-      <Modal show={openModal} size="sm" onClose={() => setOpenModal(false)} popup>
+      <Modal
+        show={openModal}
+        size="sm"
+        onClose={() => setOpenModal(false)}
+        popup
+      >
         <Modal.Header />
         <Modal.Body>
           <div className="text-center">
@@ -60,8 +80,8 @@ const DeleteAccountBtn = () => {
               Are you sure you want to delete this product?
             </h3>
             <div className="flex justify-center gap-4">
-              <Button className="bg-warning" onClick={() => setOpenModal(false)}>
-                {"Yes, I'm sure"}
+              <Button className="bg-warning" onClick={() => handleDeleteAccount(uid, auth, db)}>
+                Yes, I'm sure
               </Button>
               <Button color="gray" onClick={() => setOpenModal(false)}>
                 No, cancel
@@ -70,7 +90,7 @@ const DeleteAccountBtn = () => {
           </div>
         </Modal.Body>
       </Modal>
-    </Flowbite>
+    </>
   );
 };
 

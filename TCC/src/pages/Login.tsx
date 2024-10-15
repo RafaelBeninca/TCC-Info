@@ -9,9 +9,9 @@ import "./../index.css";
 import { FormUser } from "../components/Interfaces";
 
 const Login = () => {
-  const { userLoggedIn } = useAuth();
+  const { currentUser } = useAuth();
 
-  const [user, setUser] = useState<Omit<FormUser, "name">>({
+  const [user, setUser] = useState<Omit<FormUser, "name" | "authUid">>({
     email: "",
     password: "",
   })

@@ -14,6 +14,7 @@ import AuthDetails from "./components/AuthDetails";
 import Error from "./pages/Error";
 import Header from "./components/Header";
 import Options from "./pages/Options";
+import Test from "./pages/Test";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="opcoes" element={<Options />}>
             <Route index element={<AuthDetails />} />
           </Route>
+          <Route path="test" element={<Test />}></Route>
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
         </Route>

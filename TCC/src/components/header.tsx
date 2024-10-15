@@ -4,14 +4,14 @@ import mal from "../assets/images/mal.png";
 import blankpfp from "../assets/images/blankpfp.jpg";
 import { auth, db } from "../contexts/firebase/firebaseConfig";
 import { useEffect, useRef, useState } from "react";
-import { onAuthStateChanged, signOut, User } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { Avatar, DarkThemeToggle } from "flowbite-react";
+import { CustomTableUser } from "./Interfaces";
 
 const Header = () => {
-  const [authUser, setAuthUser] = useState<User | null>(null);
+  const [authUser, setAuthUser] = useState<CustomTableUser | null>(null);
   const [dropdownIsOpen, setDropdownIsOpen] = useState<boolean>(false);
-  const [name, setName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const dropRef = useRef<HTMLDivElement | null>(null);
@@ -37,15 +37,28 @@ const Header = () => {
 
   useEffect(() => {
     let uid: string;
+
     const listen = onAuthStateChanged(auth, async (user) => {
       if (user) {
         uid = user.uid;
         const userRef = collection(db, "user");
-        const q = query(userRef, where("uid", "==", uid));
+        const q = query(userRef, where("authUid", "==", uid));
         const querySnapshot = await getDocs(q);
 
-        setName(querySnapshot.docs[0].data().name);
-        setAuthUser(user);
+        if (!querySnapshot.empty && querySnapshot.docs[0]) {
+        const userData = querySnapshot.docs[0].data();
+
+        setAuthUser({
+          uid: userData.uid,
+          name: userData.name,
+          isProfessional: userData.isProfessional,
+          profilePicture: userData.profilePicture,
+          authUid: userData.authUid,
+        });
+        } else {
+          console.log("Error");
+          setAuthUser(null);  // No user data found
+        }
       } else {
         setAuthUser(null);
       }
@@ -100,7 +113,6 @@ const Header = () => {
               </li>
             </ul>
           </div>
-          <DarkThemeToggle/>
           <div ref={dropRef}>
             <button
               onClick={toggleDropdown}
@@ -109,12 +121,15 @@ const Header = () => {
               className="flex items-center space-x-3 rtl:space-x-reverse"
               type="button"
             >
-              <Avatar rounded
+              <Avatar
+                rounded
                 img={blankpfp}
                 className="w-10 h-10 rounded-full"
                 alt="Profile"
               />
-              <p className="text-textcolor-dark hover:text-textcolor-lightHover dark:text-textcolor-light dark:hover:text-textcolor-darkHover">{auth.currentUser ? name : "Sem conta"}</p>
+              <p className="text-textcolor-dark hover:text-textcolor-lightHover dark:text-textcolor-light dark:hover:text-textcolor-darkHover">
+                {authUser ? authUser.name : "Sem conta"}
+              </p>
             </button>
             {dropdownIsOpen && (
               <div className="absolute bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">

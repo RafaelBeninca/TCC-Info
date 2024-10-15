@@ -15,6 +15,7 @@ const Register = () => {
     name: "",
     email: "",
     password: "",
+    authUid: "",
   });
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -35,7 +36,7 @@ const Register = () => {
         .then( async (userCredential: UserCredential) => {
           console.log("sucesso :)");
           console.log(userCredential);
-          const docRef = await addDoc(userCollectionRef, { name: user.name, uid});
+          const docRef = await addDoc(userCollectionRef, { name: user.name, authUid: uid});
           console.log(docRef.id);
           navigate("/");
         })
