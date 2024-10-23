@@ -6,10 +6,12 @@ import { FormEvent, useState } from "react";
 import { FormUser } from "../components/Interfaces";
 import { addDoc, collection } from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
+import ErrorMsg from "../components/ErrorMsg";
 
 const Register = () => {
   const { userLoggedIn } = useAuth();
   const userCollectionRef = collection(db, "user");
+  const [toggleError, setToggleError] = useState<boolean>(false);
 
   const [user, setUser] = useState<FormUser>({
     name: "",
@@ -38,10 +40,13 @@ const Register = () => {
           console.log(userCredential);
           const docRef = await addDoc(userCollectionRef, { name: user.name, authUid: uid});
           console.log(docRef.id);
+          setToggleError(false)
           navigate("/");
         })
         .catch((error: FirebaseError) => {
           console.log("caca");
+          setToggleError(true)
+          console.log(error.code)
           console.log(error);
         });
     }
@@ -91,10 +96,11 @@ const Register = () => {
               href="/login"
               className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 my-5 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
               aria-current="page"
-            >
+              >
               Já possui uma senha? Entrar
             </a>
-            <br />
+            {toggleError && <ErrorMsg/>}
+            <br/>
           </div>
           <div className="flex items-start mb-5">
             <div className="flex items-center h-5">

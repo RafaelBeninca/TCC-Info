@@ -7,6 +7,7 @@ import { useAuth } from "../contexts/authContext";
 import { useState } from "react";
 import "./../index.css";
 import { FormUser } from "../components/Interfaces";
+import ErrorMsg from "../components/ErrorMsg";
 
 const Login = () => {
   const { currentUser } = useAuth();
@@ -16,19 +17,12 @@ const Login = () => {
     password: "",
   })
   const [isSigningIn, setIsSigningIn] = useState(false);
-  // const [errorMessage, setErrorMessage] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [toggleError, setToggleError] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // const handleCreateUser = async () => {
-  //   if (!user.password || !user.email) return;
-  //   await createUser(user);
-  // }
-
   const signIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
 
     if (!isSigningIn) {
@@ -38,11 +32,12 @@ const Login = () => {
         .then((userCredential) => {
           console.log("sucesso :)");
           console.log(userCredential);
+          setToggleError(false)
           navigate("/");
         })
         .catch((error) => {
-          console.log("caca");
           console.log(error);
+          setToggleError(true)
         });
     }
   };
@@ -95,6 +90,7 @@ const Login = () => {
             >
               Não tem uma conta ainda? Registre-se
             </a>
+            {toggleError && <ErrorMsg/>}
             <br />
           </div>
           <div className="flex items-start mb-5">

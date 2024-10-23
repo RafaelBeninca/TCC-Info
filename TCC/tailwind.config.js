@@ -13,7 +13,11 @@ export default {
           dark: "#adadad",
           light: "#e8e8e8",
         },
-        warning: "#ff3b3b",
+        warning: {
+          default: "#ff3b3b",
+          dark: "#a11d1d",
+          light: "#ff5959",
+        },
         textcolor: {
           light: "#e8e8e8",
           lightHover: "#bf8900",

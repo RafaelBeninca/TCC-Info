@@ -14,7 +14,8 @@ import AuthDetails from "./components/AuthDetails";
 import Error from "./pages/Error";
 import Header from "./components/Header";
 import Options from "./pages/Options";
-import Test from "./pages/Test";
+import Usuario from "./pages/Usuario";
+import Servicos from "./pages/Servicos";
 
 function App() {
   return (
@@ -25,9 +26,10 @@ function App() {
           <Route path="opcoes" element={<Options />}>
             <Route index element={<AuthDetails />} />
           </Route>
-          <Route path="test" element={<Test />}></Route>
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route path="usuario" element={<Usuario />} />
+          <Route path="servicos" element={<Servicos />} />
         </Route>
         <Route path="*" element={<Error />} />
       </Routes>

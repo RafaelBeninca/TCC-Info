@@ -8,7 +8,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { DarkThemeToggle, Flowbite } from "flowbite-react";
 import DeleteAccountBtn from "../components/DeleteAccountBtn";
 
-const Test = () => {
+const Servicos = () => {
   const [tableUser, setTableUser] = useState<CustomTableUser | null>(null);
 
   useEffect(() => {
@@ -49,7 +49,6 @@ const Test = () => {
   const { currentUser } = useAuth();
   return (
     <>
-    {currentUser ?  (<DeleteAccountBtn uid={currentUser.uid} />) : (<p>No user logged in</p>)}
       <Flowbite>
         <div className=" h-screen mt-8 bg bg-white dark:bg-slate-900">
           <div className="flex flex-col bg-gray-200 w-5/6 h-2/4 pl-6 mx-auto rounded-xl">
@@ -70,4 +69,4 @@ const Test = () => {
   );
 };
 
-export default Test;
+export default Servicos;
