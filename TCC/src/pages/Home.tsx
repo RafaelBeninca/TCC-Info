@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../contexts/authContext";
 import { auth, db } from "../contexts/firebase/firebaseConfig";
 import "flowbite";
 import { onAuthStateChanged } from "firebase/auth";
 import { CustomTableUser } from "../components/Interfaces";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { DarkThemeToggle, Flowbite } from "flowbite-react";
-import DeleteAccountBtn from "../components/DeleteAccountBtn";
+import { doc, getDoc } from "firebase/firestore";
+import { Flowbite } from "flowbite-react";
 
 const Home = () => {
   const [tableUser, setTableUser] = useState<CustomTableUser | null>(null);
@@ -18,22 +16,21 @@ const Home = () => {
 
       uid = user.uid;
       if (user) {
-        const userRef = collection(db, "user");
-        const q = query(userRef, where("authUid", "==", uid));
-        const querySnapshot = await getDocs(q);
+        const docRef = doc(db, "user", uid);
+        const docSnap = await getDoc(docRef);
+        console.log(docSnap)
 
-        if (!querySnapshot.empty && querySnapshot.docs[0]) {
-          const userData = querySnapshot.docs[0].data();
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
 
         setTableUser({
           uid: userData.uid,
           name: userData.name,
           isProfessional: userData.isProfessional,
           profilePicture: userData.profilePicture,
-          authUid: userData.authUid,
         });
         } else {
-          console.log("No user found with the given authUid");
+          console.log("Não foi possível encontrar um usuário com este id/uid" + docSnap.id + "/" + uid);
           setTableUser(null);
         }
       } else {
@@ -46,7 +43,6 @@ const Home = () => {
     };
   }, []);
 
-  const { currentUser } = useAuth();
   return (
     <>
       <Flowbite>

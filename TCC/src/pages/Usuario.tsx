@@ -6,7 +6,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { CustomTableUser } from "../components/Interfaces";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { DarkThemeToggle, Flowbite } from "flowbite-react";
-import DeleteAccountBtn from "../components/DeleteAccountBtn";
+import blankpfp from "../assets/images/blankpfp.jpg";
 
 const Usuario = () => {
   const [tableUser, setTableUser] = useState<CustomTableUser | null>(null);
@@ -50,18 +50,9 @@ const Usuario = () => {
   return (
     <>
       <Flowbite>
-        <div className=" h-screen mt-8 bg bg-white dark:bg-slate-900">
+        <div className="flex justify-center h-screen mt-8 bg bg-white dark:bg-slate-900">
+          <img src={blankpfp} className="h-1/3 rounded-full"></img>
           <div className="flex flex-col bg-gray-200 w-5/6 h-2/4 pl-6 mx-auto rounded-xl">
-            {tableUser && (
-              <p className="pt-5 text-6xl font-bold">
-                Bem-Vindo, {tableUser.name}!
-              </p>
-            )}
-            <p className="pt-5 text-2xl">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc
-              convallis sit amet felis ac fringilla. Lorem ipsum dolor sit amet,
-              consectetur adipiscing elit.
-            </p>
           </div>
         </div>
       </Flowbite>

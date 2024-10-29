@@ -1,12 +1,26 @@
-import { createUserWithEmailAndPassword, onAuthStateChanged, UserCredential } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  User,
+  UserCredential,
+} from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/authContext";
 import { auth, db } from "../contexts/firebase/firebaseConfig";
-import { FormEvent, useState } from "react";
+import { FormEvent, useContext, useState } from "react";
 import { FormUser } from "../components/Interfaces";
-import { addDoc, collection } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  serverTimestamp,
+  setDoc,
+  Timestamp,
+} from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
 import ErrorMsg from "../components/ErrorMsg";
+import { FirebaseAuthContext } from "../contexts/AuthenticationProvider/FirebaseAuthContext";
+import { doSignInWithEmailAndPassword } from "../contexts/authContext/auth";
 
 const Register = () => {
   const { userLoggedIn } = useAuth();
@@ -17,38 +31,81 @@ const Register = () => {
     name: "",
     email: "",
     password: "",
-    authUid: "",
   });
+
+  const context = useContext(FirebaseAuthContext);
+
+  if (!context) {
+    throw new Error(
+      "FirebaseAuthContext must be used within a FirebaseAuthContextProvider"
+    );
+  }
+
+  const { dispatch } = context;
+
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
-  let uid:string
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      uid = user.uid
-    }
-  })
+  // onAuthStateChanged(auth, (user) => {
+  //   if (user) {
+  //     uid = user.uid
+  //   }
+  // })
 
   const signUp = async (e: FormEvent) => {
     e.preventDefault();
     if (!isSigningIn) {
       setIsSigningIn(true);
-      await createUserWithEmailAndPassword(auth, user.email, user.password)
-        .then( async (userCredential: UserCredential) => {
-          console.log("sucesso :)");
-          console.log(userCredential);
-          const docRef = await addDoc(userCollectionRef, { name: user.name, authUid: uid});
-          console.log(docRef.id);
-          setToggleError(false)
-          navigate("/");
-        })
-        .catch((error: FirebaseError) => {
-          console.log("caca");
-          setToggleError(true)
-          console.log(error.code)
-          console.log(error);
+      try {
+        const res = await createUserWithEmailAndPassword(
+          auth,
+          user.email,
+          user.password
+        );
+        const userCredential = await doSignInWithEmailAndPassword(
+          user.email,
+          user.password
+        );
+        dispatch({
+          type: "LOGIN",
+          payload: {
+            ...userCredential.user,
+            email: userCredential.user.email as string,
+          },
         });
+        await setDoc(doc(db, "user", res.user.uid), {
+          ...user,
+          Timestamp: serverTimestamp(),
+        });
+        setToggleError(false);
+        navigate("/");
+      } catch (error) {
+        console.log("Erro ao Registrar usuário: " + error);
+        setToggleError(true);
+      }
+
+      // const res = await createUserWithEmailAndPassword(
+      //   auth,
+      //   user.email,
+      //   user.password
+      // )
+      //   .then( async (userCredential: UserCredential) => {
+      //     console.log("Usuário registrado com sucesso: "+userCredential);
+      //     const docRef = await addDoc(userCollectionRef, {
+      //       name: user.name,
+      //       authUid: uid,
+      //       Timestamp: serverTimestamp()
+      //     });
+      //     console.log(docRef.id);
+      //     setToggleError(false)
+      //     navigate("/");
+      //   })
+      //   .catch((error: FirebaseError) => {
+      //     console.log("caca");
+      //     setToggleError(true)
+      //     console.log(error.code)
+      //     console.log(error);
+      //   });
     }
   };
 
@@ -96,11 +153,11 @@ const Register = () => {
               href="/login"
               className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 my-5 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
               aria-current="page"
-              >
+            >
               Já possui uma senha? Entrar
             </a>
-            {toggleError && <ErrorMsg/>}
-            <br/>
+            {toggleError && <ErrorMsg />}
+            <br />
           </div>
           <div className="flex items-start mb-5">
             <div className="flex items-center h-5">

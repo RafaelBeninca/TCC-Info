@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+/** @type {import('tailwindcss').Config} */ //#6e54a0 #a0549c
 export default {
   content: [
     "./index.html",
@@ -9,9 +9,9 @@ export default {
     extend: {
       colors: {
         primary: {
-          default: "#d6d6d6",
-          dark: "#adadad",
-          light: "#e8e8e8",
+          default: "#6e54a0",
+          dark: "#594482",
+          light: "#8367b8",
         },
         warning: {
           default: "#ff3b3b",

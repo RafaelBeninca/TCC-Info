@@ -2,7 +2,13 @@ export interface FormUser {
   name: string;
   email: string;
   password: string;
-  authUid: string;
+}
+
+export interface ChangeUser {
+  name: string;
+  email: string;
+  password: string;
+  profilePicture: string;
 }
 
 export interface CustomTableUser {
@@ -10,5 +16,4 @@ export interface CustomTableUser {
   name: string;
   isProfessional: boolean;
   profilePicture: string;
-  authUid: string;
 }

@@ -1,36 +1,83 @@
 import { useEffect, useState } from "react";
 import DeleteAccountBtn from "../components/DeleteAccountBtn";
 import {
-  getAuth,
   onAuthStateChanged,
   updateEmail,
   updatePassword,
   sendEmailVerification,
   User,
 } from "firebase/auth";
-import { auth, db } from "../contexts/firebase/firebaseConfig";
-import { Button } from "flowbite-react";
-import { doc, updateDoc } from "firebase/firestore";
+import { auth, db, storage } from "../contexts/firebase/firebaseConfig";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import blankpfp from "../assets/images/blankpfp.jpg";
+import { addDoc, collection } from "firebase/firestore";
 
 const Opcoes = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [newName, setNewName] = useState("");
-  const [newEmail, setNewEmail] = useState("");
+  const [newName, setNewName] = useState();
+  const [newEmail, setNewEmail] = useState(auth.currentUser?.email || "");
   const [emailSent, setEmailSent] = useState<boolean>(false)
   const [isVerified, setIsVerified] = useState<boolean>(false)
   const [newPassword, setNewPassword] = useState("");
-  // const [profilePicture, setProfilePicture] = useState("");
+  // const [file, setFile] = useState("");
+  const [image, setImage] = useState<File | null>(null);
 
-  const handleUpdatePofile = async () => {
-    console.log("Start")
-    const updateFirestoreData = async (userId: string, newData: object) => {
-      const userDocRef = doc(db, "user", userId);
-      try {
-        await updateDoc(userDocRef, newData);
-      } catch (err) {
-        console.error("Error", err);
+  // useEffect(() => {
+  //   const uploadFile = () => {
+  //     const name = new Date().getTime() + file.name
+
+  //     console.log(name)
+  //     const storageRef = ref(storage, file.name)
+  //     const uploadTask = uploadBytesResumable(storageRef, file)
+  //   };
+  //   file && uploadFile();
+  // },[file])
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setImage(e.target.files[0]);
+    }
+  };
+
+  const handleUpdatePofile = async (e: React.FormEvent) => { //arrumar a troca de foto de perfil
+    e.preventDefault();
+
+    if (!image) return;
+
+    const storageRef = ref(storage, `../assets/images/${image.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, image);
+
+    uploadTask.on('state_changed',
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log(`Progresso: ${progress}`);
+      },
+      (error) => {
+        console.error("Falha no upload: ", error);
+      },
+      async () => {
+        // const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+
+        const ChangeImage = {
+          profilePicture: image.name,
+        };
+
+        try {
+          await addDoc(collection(db, "user"), ChangeImage);
+          console.log("Imagem salva com sucesso!")
+        } catch (error) {
+          console.error("Erro ao dar upload na imagem: ", error)
+        }
       }
-    };
+    )
+    // const updateFirestoreData = async (userId: string, newData: object) => {
+    //   const userDocRef = doc(db, "user", userId);
+    //   try {
+    //     await updateDoc(userDocRef, newData);
+    //   } catch (err) {
+    //     console.error("Error", err);
+    //   }  
+    // };
 
     const user = auth.currentUser;
     if (user) {
@@ -52,17 +99,6 @@ const Opcoes = () => {
             } catch (error) {
               console.error("Error at updating email: ", error)
             }
-
-            try {
-              await updatePassword(user, newPassword);
-              await user.reload();
-              console.log("Updated email: ", user.password);
-            } catch (error) {
-              console.error("Error at updating email: ", error)
-            }
-
-            const newData = { newName };
-            await updateFirestoreData(user.name, newData);
             
           } else {
             console.log("email ainda não verificado")
@@ -92,10 +128,7 @@ const Opcoes = () => {
 
   return (
     <div>
-      <form onSubmit={(e) =>  {
-        e.preventDefault();
-        handleUpdatePofile();
-      }}>
+      <form onSubmit={handleUpdatePofile}>
       <div className="flex flex-row">
         <h1 className="p-4 text-4xl font-bold">Opções</h1>
         <svg
@@ -145,6 +178,7 @@ const Opcoes = () => {
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
         ></input>
+        <input type="file" onChange={handleImageChange}></input>
       </div>
       <button className="m-4 mt-10 " type="submit">Alterar</button>
       {isVerified && <p>Email has been successfully updated!</p>}

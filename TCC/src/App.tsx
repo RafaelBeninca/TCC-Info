@@ -16,23 +16,26 @@ import Header from "./components/Header";
 import Options from "./pages/Options";
 import Usuario from "./pages/Usuario";
 import Servicos from "./pages/Servicos";
+import { FirebaseAuthContextProvider } from "./contexts/AuthenticationProvider/FirebaseAuthContext";
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Header />}>
-          <Route index element={<Home />} />
-          <Route path="opcoes" element={<Options />}>
-            <Route index element={<AuthDetails />} />
+      <FirebaseAuthContextProvider>
+        <Routes>
+          <Route path="/" element={<Header />}>
+            <Route index element={<Home />} />
+            <Route path="opcoes" element={<Options />}>
+              <Route index element={<AuthDetails />} />
+            </Route>
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
+            <Route path="usuario" element={<Usuario />} />
+            <Route path="servicos" element={<Servicos />} />
           </Route>
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
-          <Route path="usuario" element={<Usuario />} />
-          <Route path="servicos" element={<Servicos />} />
-        </Route>
-        <Route path="*" element={<Error />} />
-      </Routes>
+          <Route path="*" element={<Error />} />
+        </Routes>
+      </FirebaseAuthContextProvider>
     </BrowserRouter>
   );
 }

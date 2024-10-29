@@ -4,41 +4,69 @@ import {
 } from "../contexts/authContext/auth";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/authContext";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import "./../index.css";
 import { FormUser } from "../components/Interfaces";
+import { FirebaseUser } from "../components/Interfaces";
 import ErrorMsg from "../components/ErrorMsg";
+import { FirebaseAuthContext } from "../contexts/AuthenticationProvider/FirebaseAuthContext";
+import { User } from "firebase/auth";
 
 const Login = () => {
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [toggleError, setToggleError] = useState<boolean>(false);
+  const navigate = useNavigate();
   const { currentUser } = useAuth();
+
+  const context = useContext(FirebaseAuthContext);
+
+  if (!context) {
+    throw new Error("FirebaseAuthContext must be used within a FirebaseAuthContextProvider");
+  }
+
+  const {dispatch} = context;
+  
 
   const [user, setUser] = useState<Omit<FormUser, "name" | "authUid">>({
     email: "",
     password: "",
   })
-  const [isSigningIn, setIsSigningIn] = useState(false);
-  const [toggleError, setToggleError] = useState<boolean>(false);
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
-  const signIn = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+
 
     if (!isSigningIn) {
       setIsSigningIn(true);
-      setLoading(false);
-      await doSignInWithEmailAndPassword(user.email, user.password)
-        .then((userCredential) => {
-          console.log("sucesso :)");
-          console.log(userCredential);
-          setToggleError(false)
-          navigate("/");
-        })
-        .catch((error) => {
-          console.log(error);
-          setToggleError(true)
+      try {
+        const userCredential = await doSignInWithEmailAndPassword(user.email, user.password);
+        dispatch({
+          type: "LOGIN",
+          payload: {
+            ...userCredential.user,
+            email: userCredential.user.email as string,
+          },
         });
+        console.log("Usuário logado com sucesso: "+userCredential);
+        setToggleError(false);
+        navigate("/");
+      } catch (error) {
+        console.log(error);
+        setToggleError(true);
+      } finally {
+        setIsSigningIn(false)
+      }
+      // await doSignInWithEmailAndPassword(user.email, user.password)
+      //   .then((userCredential) => {
+      //     dispatch({ type: "LOGIN", payload: userCredential.user });
+      //     console.log("Usuário logado com sucesso: "+userCredential);
+      //     setToggleError(false)
+      //     navigate("/");
+      //   })
+      //   .catch((error) => {
+      //     console.log(error);
+      //     setToggleError(true)
+      //   });
     }
   };
 
@@ -58,7 +86,7 @@ const Login = () => {
         className="border-4 rounded-lg px-10 w-1/3 mx-auto"
         style={{ marginTop: "5%", paddingBottom: "5%" }}
       >
-        <form className="max-w-sm mx-auto mt-20" onSubmit={signIn}>
+        <form className="max-w-sm mx-auto mt-20" onSubmit={handleLogin}>
           <span className="text-3xl font-semibold whitespace-nowrap dark:text-white">
             Login
           </span>

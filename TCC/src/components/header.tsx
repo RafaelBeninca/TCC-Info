@@ -1,18 +1,16 @@
 import { Outlet, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/authContext";
-import mal from "../assets/images/mal.png";
+import logo from "../assets/images/Logo.png"
 import blankpfp from "../assets/images/blankpfp.jpg";
 import { auth, db } from "../contexts/firebase/firebaseConfig";
 import { useEffect, useRef, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { Avatar, DarkThemeToggle } from "flowbite-react";
 import { CustomTableUser } from "./Interfaces";
 
 const Header = () => {
   const [authUser, setAuthUser] = useState<CustomTableUser | null>(null);
   const [dropdownIsOpen, setDropdownIsOpen] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
 
   const dropRef = useRef<HTMLDivElement | null>(null);
 
@@ -41,19 +39,18 @@ const Header = () => {
     const listen = onAuthStateChanged(auth, async (user) => {
       if (user) {
         uid = user.uid;
-        const userRef = collection(db, "user");
-        const q = query(userRef, where("authUid", "==", uid));
-        const querySnapshot = await getDocs(q);
+        const docRef = doc(db, "user", uid);
+        const docSnap = await getDoc(docRef);
+        console.log(docSnap)
 
-        if (!querySnapshot.empty && querySnapshot.docs[0]) {
-        const userData = querySnapshot.docs[0].data();
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
 
         setAuthUser({
           uid: userData.uid,
           name: userData.name,
           isProfessional: userData.isProfessional,
           profilePicture: userData.profilePicture,
-          authUid: userData.authUid,
         });
         } else {
           console.log("Error");
@@ -78,25 +75,31 @@ const Header = () => {
       })
       .catch((error) => console.log(error));
   };
-  const { userLoggedIn } = useAuth();
   return (
     <>
-      <nav className="bg-white border-gray-200 dark:bg-gray-900 border-b-2">
+      <nav className="bg-white border-gray-200 dark:bg-gray-900 border-b-2 shadow-lg">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <a
             href="/"
             className="flex items-center space-x-3 rtl:space-x-reverse"
           >
-            <img src={mal} className="h-8" alt="Flowbite Logo" />
-            <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-              Site
+            <div className="flex flex-row transform hover:scale-105 transition-transform duration-300">
+            <img src={logo} className="h-11 mr-1" alt="Flowbite Logo" />
+            <p className="mt-1.5">
+            <span className="self-center text-4xl font-semibold whitespace-nowrap text-primary-dark">
+              Work
             </span>
+            <span className="self-center text-2xl font-semibold whitespace-nowrap text-primary-light">
+              Space
+            </span>
+            </p>
+            </div>
           </a>
           <div className="hidden w-full md:block md:w-auto" id="navbar-default">
             <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
               <li>
                 <a
-                  href="/services"
+                  href="/servicos"
                   className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
                   aria-current="page"
                 >
