@@ -4,11 +4,12 @@ export interface FormUser {
   password: string;
 }
 
-export interface ChangeUser {
+export interface Data {
   name: string;
-  email: string;
+  profilePicture?: string;
   password: string;
-  profilePicture: string;
+  email: string;
+  [key: string]: unknown;
 }
 
 export interface CustomTableUser {

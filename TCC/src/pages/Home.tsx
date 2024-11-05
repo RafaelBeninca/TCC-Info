@@ -5,32 +5,37 @@ import { onAuthStateChanged } from "firebase/auth";
 import { CustomTableUser } from "../components/Interfaces";
 import { doc, getDoc } from "firebase/firestore";
 import { Flowbite } from "flowbite-react";
+import useTableUserContext from "../hooks/useTableUserContext";
 
 const Home = () => {
   const [tableUser, setTableUser] = useState<CustomTableUser | null>(null);
+  const { user } = useTableUserContext();
 
   useEffect(() => {
-    let uid: string;
     const listen = onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
-
-      uid = user.uid;
       if (user) {
+        const uid = user.uid;
+        console.log(uid);
         const docRef = doc(db, "user", uid);
         const docSnap = await getDoc(docRef);
-        console.log(docSnap)
+        console.log(docSnap);
 
         if (docSnap.exists()) {
           const userData = docSnap.data();
 
-        setTableUser({
-          uid: userData.uid,
-          name: userData.name,
-          isProfessional: userData.isProfessional,
-          profilePicture: userData.profilePicture,
-        });
+          setTableUser({
+            uid: userData.uid,
+            name: userData.name,
+            isProfessional: userData.isProfessional,
+            profilePicture: userData.profilePicture,
+          });
         } else {
-          console.log("Não foi possível encontrar um usuário com este id/uid" + docSnap.id + "/" + uid);
+          console.log(
+            "Não foi possível encontrar um usuário com este id/uid" +
+              docSnap.id +
+              "/" +
+              uid
+          );
           setTableUser(null);
         }
       } else {
@@ -46,13 +51,15 @@ const Home = () => {
   return (
     <>
       <Flowbite>
-        <div className=" h-screen mt-8 bg bg-white dark:bg-slate-900">
-          <div className="flex flex-col bg-gray-200 w-5/6 h-2/4 pl-6 mx-auto rounded-xl">
-            {tableUser && (
-              <p className="pt-5 text-6xl font-bold">
-                Bem-Vindo, {tableUser.name}!
-              </p>
-            )}
+        <div className=" h-screen mt-8 bg px-20 bg-white dark:bg-slate-900">
+          {tableUser && (
+            <div className="flex flex-row mt-10">
+              <p className="pt-5 text-6xl font-medium">Bem-Vindo,</p>{" "}
+              <p className="pt-5 text-6xl font-bold text-primary-default">{user?.name}!</p>
+            </div>
+          )}
+          <div className="h-0.5 mt-3 mb-10 w-1/2 bg-primary-default"/>
+          <div className="flex flex-col bg-gray-200 h-2/4 pl-6 mx-auto rounded-xl">
             <p className="pt-5 text-2xl">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc
               convallis sit amet felis ac fringilla. Lorem ipsum dolor sit amet,

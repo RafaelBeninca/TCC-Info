@@ -1,55 +1,58 @@
-import { Auth, User, deleteUser, onAuthStateChanged } from "firebase/auth";
-import { useEffect, useState } from "react";
-import { auth, db } from "../contexts/firebase/firebaseConfig";
-import { useNavigate } from "react-router-dom";
+import { Auth, deleteUser } from "firebase/auth";
+import {
+  deleteDoc,
+  doc,
+  Firestore,
+  getDoc
+} from "firebase/firestore";
 import { Button, Modal } from "flowbite-react";
+import { useContext, useState } from "react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
-import { collection, deleteDoc, doc, Firestore, getDocs, query, where } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+import { auth, db } from "../contexts/firebase/firebaseConfig";
+import useTableUserContext from "../hooks/useTableUserContext";
+import { FirebaseAuthContext } from "../contexts/AuthenticationProvider/FirebaseAuthContext";
 
-const DeleteAccountBtn: React.FC<{ uid: string}> = ({ uid }) => {
-  const [authUser, setAuthUser] = useState<User | null>(null);
+const DeleteAccountBtn: React.FC = () => {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const navigate = useNavigate();
+  const { user } = useTableUserContext();
 
-  useEffect(() => {
-    const listen = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setAuthUser(user);
-      } else {
-        setAuthUser(null);
-      }
-    });
+  const context = useContext(FirebaseAuthContext);
 
-    return () => {
-      listen();
-    };
-  }, []);
+  if (!context) {
+    throw new Error("FirebaseAuthContext must be used within a FirebaseAuthContextProvider");
+  }
 
+  const {dispatch} = context;
 
-
-  async function handleDeleteAccount(uid: string, auth: Auth, db: Firestore): Promise<void> {
+  async function handleDeleteAccount(
+    uid: string,
+    auth: Auth,
+    db: Firestore
+  ): Promise<void> {
     try {
-
-      const userRef = collection(db, "user");
-      const q = query(userRef, where("authUid", "==", uid));
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty && querySnapshot.docs[0]) {
-        const userDoc = querySnapshot.docs[0];
-        const userDocRef = doc(db, "user", userDoc.id);
-        await deleteDoc(userDocRef);
-        console.log("Firestore document deleted successfuly.")
-      } else {
-        console.log("Error in deleting the Firestore document.")
-      }
-  
       const user = auth.currentUser;
       if (user && user.uid === uid) {
         await deleteUser(user);
-        console.log(`User ${uid} deleted successfully from Firebase Authentication.`);
-        navigate("/login");
+        console.log(
+          `User ${uid} deleted successfully from Firebase Authentication.`
+        );
       } else {
         console.error(`No authenticated user found or user ID mismatch.`);
+      }
+
+      const userRef = doc(db, "user", uid);
+      const userDoc = await getDoc(userRef);
+      if (userDoc.exists()) {
+        await deleteDoc(userRef);
+        console.log("Documento deletado com sucesso do Firestore.");
+        dispatch({
+          type: "LOGOUT",
+        });
+        navigate("/login");
+      } else {
+        console.log("Erro ao deletar documento do Firestore.");
       }
     } catch (error) {
       console.error("Error deleting user or document:", error);
@@ -60,7 +63,7 @@ const DeleteAccountBtn: React.FC<{ uid: string}> = ({ uid }) => {
     <>
       <Button
         onClick={() => setOpenModal(true)}
-        className="m-4 text-sm font-medium bgcol text-primary-light focus:outline-none bg-warning-default rounded-lg border-warning-light hover:bg-warning-dark hover:text-textcolor-light focus:z-10 focus:ring-4 focus:ring-gray-100"
+        className="m-4 text-sm font-medium bgcol text-textcolor-light focus:outline-none bg-warning-default rounded-lg border-warning-light hover:bg-warning-dark hover:text-textcolor-light focus:z-10 focus:ring-4 focus:ring-gray-100"
       >
         Deletar conta
       </Button>
@@ -75,14 +78,17 @@ const DeleteAccountBtn: React.FC<{ uid: string}> = ({ uid }) => {
           <div className="text-center">
             <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
             <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-primary-dark">
-              Are you sure you want to delete this product?
+              Você tem certeza?
             </h3>
             <div className="flex justify-center gap-4">
-              <Button className="bg-warning-default" onClick={() => handleDeleteAccount(uid, auth, db)}>
-                Yes, I'm sure
+              <Button
+                className="bg-warning-default"
+                onClick={() => handleDeleteAccount(user?.uid || "", auth, db)}
+              >
+                Sim, deletar
               </Button>
               <Button color="gray" onClick={() => setOpenModal(false)}>
-                No, cancel
+                Não, cancelar
               </Button>
             </div>
           </div>

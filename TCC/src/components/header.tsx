@@ -1,15 +1,25 @@
+import { signOut } from "firebase/auth";
+import { Avatar } from "flowbite-react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import logo from "../assets/images/Logo.png"
+import logo from "../assets/images/Logo.png";
 import blankpfp from "../assets/images/blankpfp.jpg";
-import { auth, db } from "../contexts/firebase/firebaseConfig";
-import { useEffect, useRef, useState } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
-import { Avatar, DarkThemeToggle } from "flowbite-react";
+import { auth } from "../contexts/firebase/firebaseConfig";
+import useTableUserContext from "../hooks/useTableUserContext";
 import { CustomTableUser } from "./Interfaces";
+import { FirebaseAuthContext } from "../contexts/AuthenticationProvider/FirebaseAuthContext";
 
 const Header = () => {
-  const [authUser, setAuthUser] = useState<CustomTableUser | null>(null);
+  const { user } = useTableUserContext();
+  const context = useContext(FirebaseAuthContext);
+
+  if (!context) {
+    throw new Error("FirebaseAuthContext must be used within a FirebaseAuthContextProvider");
+  }
+
+
+  const {dispatch} = context;
+
   const [dropdownIsOpen, setDropdownIsOpen] = useState<boolean>(false);
 
   const dropRef = useRef<HTMLDivElement | null>(null);
@@ -33,48 +43,19 @@ const Header = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    let uid: string;
-
-    const listen = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        uid = user.uid;
-        const docRef = doc(db, "user", uid);
-        const docSnap = await getDoc(docRef);
-        console.log(docSnap)
-
-        if (docSnap.exists()) {
-          const userData = docSnap.data();
-
-        setAuthUser({
-          uid: userData.uid,
-          name: userData.name,
-          isProfessional: userData.isProfessional,
-          profilePicture: userData.profilePicture,
-        });
-        } else {
-          console.log("Error");
-          setAuthUser(null);  // No user data found
-        }
-      } else {
-        setAuthUser(null);
-      }
-    });
-
-    return () => {
-      listen();
-    };
-  }, []);
-
-  const userSignOut = () => {
+  const handleLogout = () => {
     signOut(auth)
       .then(() => {
+        dispatch({
+          type: "LOGOUT",
+        });
         console.log("Deslogado com sucesso!");
         navigate("/login");
         toggleDropdown();
       })
       .catch((error) => console.log(error));
   };
+
   return (
     <>
       <nav className="bg-white border-gray-200 dark:bg-gray-900 border-b-2 shadow-lg">
@@ -84,15 +65,15 @@ const Header = () => {
             className="flex items-center space-x-3 rtl:space-x-reverse"
           >
             <div className="flex flex-row transform hover:scale-105 transition-transform duration-300">
-            <img src={logo} className="h-11 mr-1" alt="Flowbite Logo" />
-            <p className="mt-1.5">
-            <span className="self-center text-4xl font-semibold whitespace-nowrap text-primary-dark">
-              Work
-            </span>
-            <span className="self-center text-2xl font-semibold whitespace-nowrap text-primary-light">
-              Space
-            </span>
-            </p>
+              <img src={logo} className="h-11 mr-1" alt="Flowbite Logo" />
+              <p className="mt-1.5">
+                <span className="self-center text-4xl font-semibold whitespace-nowrap text-primary-dark">
+                  Work
+                </span>
+                <span className="self-center text-2xl font-semibold whitespace-nowrap text-primary-light">
+                  Space
+                </span>
+              </p>
             </div>
           </a>
           <div className="hidden w-full md:block md:w-auto" id="navbar-default">
@@ -100,7 +81,7 @@ const Header = () => {
               <li>
                 <a
                   href="/servicos"
-                  className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                  className="block py-2 px-3 text-gray-900 md:hover:bg-transparent transform hover:scale-105 hover:bg-gray-100 hover:text-primary-default transition-transform duration-300"
                   aria-current="page"
                 >
                   Serviços
@@ -109,7 +90,7 @@ const Header = () => {
               <li>
                 <a
                   href="/login"
-                  className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                  className="block py-2 px-3 text-gray-900 md:hover:bg-transparent transform hover:scale-105 hover:bg-gray-100 hover:text-primary-default transition-transform duration-300"
                 >
                   Login
                 </a>
@@ -126,23 +107,20 @@ const Header = () => {
             >
               <Avatar
                 rounded
-                img={blankpfp}
+                img={user?.profilePicture ? user.profilePicture : blankpfp}
                 className="w-10 h-10 rounded-full"
                 alt="Profile"
               />
               <p className="text-textcolor-dark hover:text-textcolor-lightHover dark:text-textcolor-light dark:hover:text-textcolor-darkHover">
-                {authUser ? authUser.name : "Sem conta"}
+                {user ? user.name : "Sem conta"}
               </p>
             </button>
             {dropdownIsOpen && (
               <div className="absolute bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
                 <div className="py-1">
-                  {authUser ? (
+                  {user ? (
                     <>
-                      <a
-                        href="/usuario"
-                        className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
+                      <a href="/usuario" className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         <svg
                           className="w-6 h-6 mr-3 text-gray-800 dark:text-white"
                           aria-hidden="true"
@@ -160,29 +138,8 @@ const Header = () => {
                         </svg>
                         Usuário
                       </a>
-                      <a
-                        href="/opcoes"
-                        className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        <svg
-                          className="w-6 h-6 mr-3 text-gray-800 dark:text-white"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            fill-rule="evenodd"
-                            d="M9.586 2.586A2 2 0 0 1 11 2h2a2 2 0 0 1 2 2v.089l.473.196.063-.063a2.002 2.002 0 0 1 2.828 0l1.414 1.414a2 2 0 0 1 0 2.827l-.063.064.196.473H20a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-.089l-.196.473.063.063a2.002 2.002 0 0 1 0 2.828l-1.414 1.414a2 2 0 0 1-2.828 0l-.063-.063-.473.196V20a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-.089l-.473-.196-.063.063a2.002 2.002 0 0 1-2.828 0l-1.414-1.414a2 2 0 0 1 0-2.827l.063-.064L4.089 15H4a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h.09l.195-.473-.063-.063a2 2 0 0 1 0-2.828l1.414-1.414a2 2 0 0 1 2.827 0l.064.063L9 4.089V4a2 2 0 0 1 .586-1.414ZM8 12a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"
-                            clip-rule="evenodd"
-                          />
-                        </svg>
-                        Opções
-                      </a>
                       <button
-                        onClick={userSignOut}
+                        onClick={handleLogout}
                         className="flex px-4 py-2 w-full text-sm text-gray-700 hover:bg-gray-100"
                       >
                         <svg

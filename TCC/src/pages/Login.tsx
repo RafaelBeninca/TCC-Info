@@ -1,22 +1,18 @@
 import {
   doSignInWithEmailAndPassword,
-  doSignInWithGoogle,
 } from "../contexts/authContext/auth";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/authContext";
 import { useContext, useState } from "react";
 import "./../index.css";
 import { FormUser } from "../components/Interfaces";
-import { FirebaseUser } from "../components/Interfaces";
 import ErrorMsg from "../components/ErrorMsg";
 import { FirebaseAuthContext } from "../contexts/AuthenticationProvider/FirebaseAuthContext";
-import { User } from "firebase/auth";
 
 const Login = () => {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [toggleError, setToggleError] = useState<boolean>(false);
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
 
   const context = useContext(FirebaseAuthContext);
 
@@ -25,9 +21,8 @@ const Login = () => {
   }
 
   const {dispatch} = context;
-  
 
-  const [user, setUser] = useState<Omit<FormUser, "name" | "authUid">>({
+  const [user, setUser] = useState<Omit<FormUser, "name">>({
     email: "",
     password: "",
   })
@@ -56,17 +51,6 @@ const Login = () => {
       } finally {
         setIsSigningIn(false)
       }
-      // await doSignInWithEmailAndPassword(user.email, user.password)
-      //   .then((userCredential) => {
-      //     dispatch({ type: "LOGIN", payload: userCredential.user });
-      //     console.log("Usuário logado com sucesso: "+userCredential);
-      //     setToggleError(false)
-      //     navigate("/");
-      //   })
-      //   .catch((error) => {
-      //     console.log(error);
-      //     setToggleError(true)
-      //   });
     }
   };
 

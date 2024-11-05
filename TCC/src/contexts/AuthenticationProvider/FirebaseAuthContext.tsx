@@ -23,7 +23,7 @@ const INITIAL_STATE: AuthState = {
   currentUser: JSON.parse(localStorage.getItem("user") || "null")
 };
 
-export const FirebaseAuthContext = createContext<FirebaseAuthContextType | undefined>(undefined);
+export const FirebaseAuthContext = createContext<FirebaseAuthContextType | null>(null);
 
 export const FirebaseAuthContextProvider: React.FC<{ children: ReactNode}> = ({ children }) => {
   const [state, dispatch] = useReducer(FirebaseAuthReducer, INITIAL_STATE);

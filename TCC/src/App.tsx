@@ -1,40 +1,31 @@
-import * as ReactDom from "react-dom/client";
-import {
-  BrowserRouter,
-  createBrowserRouter,
-  RouterProvider,
-  useRoutes,
-} from "react-router-dom";
-import { Routes, Route } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
+import Header from "./components/Header";
+import { FirebaseAuthContextProvider } from "./contexts/AuthenticationProvider/FirebaseAuthContext";
+import { TableUserContextProvider } from "./contexts/AuthenticationProvider/TableUserContext";
+import Error from "./pages/Error";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Home from "./pages/Home";
-import AuthDetails from "./components/AuthDetails";
-import Error from "./pages/Error";
-import Header from "./components/Header";
-import Options from "./pages/Options";
-import Usuario from "./pages/Usuario";
 import Servicos from "./pages/Servicos";
-import { FirebaseAuthContextProvider } from "./contexts/AuthenticationProvider/FirebaseAuthContext";
+import Usuario from "./pages/Usuario";
 
 function App() {
   return (
     <BrowserRouter>
       <FirebaseAuthContextProvider>
-        <Routes>
-          <Route path="/" element={<Header />}>
-            <Route index element={<Home />} />
-            <Route path="opcoes" element={<Options />}>
-              <Route index element={<AuthDetails />} />
+        <TableUserContextProvider>
+          <Routes>
+            <Route path="/" element={<Header />}>
+              <Route index element={<Home />} />
+              <Route path="login" element={<Login />} />
+              <Route path="register" element={<Register />} />
+              <Route path="usuario" element={<Usuario />} />
+              <Route path="servicos" element={<Servicos />} />
             </Route>
-            <Route path="login" element={<Login />} />
-            <Route path="register" element={<Register />} />
-            <Route path="usuario" element={<Usuario />} />
-            <Route path="servicos" element={<Servicos />} />
-          </Route>
-          <Route path="*" element={<Error />} />
-        </Routes>
+            <Route path="*" element={<Error />} />
+          </Routes>
+        </TableUserContextProvider>
       </FirebaseAuthContextProvider>
     </BrowserRouter>
   );

@@ -15,6 +15,7 @@ const Servicos = () => {
   type UserList = {
     id: string;
     name: string;
+    profilePicture: string;
   };
 
   useEffect(() => {
@@ -73,13 +74,13 @@ const Servicos = () => {
     <>
       <Flowbite>
         <p className="pt-5 m-10 text-6xl text-primary-dark font-semibold">
-          Serviçõs de {"..."} encontrados
+          Serviços de {"..."} encontrados
         </p>
         <div className="mt-7 bg bg-white dark:bg-slate-900">
           <div className="flex flex-row h-screen overflow-x-auto bg-gray-50 shadow-xl w-5/6 pl-6 mx-auto rounded-xl">
             {users.map((user) => (
               <div key={user.id} className="flex flex-col m-5 h-80 p-3 rounded w-60 bg-slate-200 justify-center align-middle">
-                <img src={blankpfp} className="w-full bg-slate-100 rounded"></img>
+                <img src={user?.profilePicture ? user.profilePicture : blankpfp} className="w-full bg-slate-100 rounded"></img>
                 <div className="w-full h-10 mt-4 p-1 rounded bg-slate-100">
                   <p className="text-justify align-center text-2xl text-primary-dark font-semibold">{user.name}</p>
                 </div>

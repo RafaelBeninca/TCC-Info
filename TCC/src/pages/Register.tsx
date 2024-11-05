@@ -1,30 +1,14 @@
-import {
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  User,
-  UserCredential,
-} from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/authContext";
 import { auth, db } from "../contexts/firebase/firebaseConfig";
 import { FormEvent, useContext, useState } from "react";
 import { FormUser } from "../components/Interfaces";
-import {
-  addDoc,
-  collection,
-  doc,
-  serverTimestamp,
-  setDoc,
-  Timestamp,
-} from "firebase/firestore";
-import { FirebaseError } from "firebase/app";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import ErrorMsg from "../components/ErrorMsg";
 import { FirebaseAuthContext } from "../contexts/AuthenticationProvider/FirebaseAuthContext";
 import { doSignInWithEmailAndPassword } from "../contexts/authContext/auth";
 
 const Register = () => {
-  const { userLoggedIn } = useAuth();
-  const userCollectionRef = collection(db, "user");
   const [toggleError, setToggleError] = useState<boolean>(false);
 
   const [user, setUser] = useState<FormUser>({
@@ -73,6 +57,7 @@ const Register = () => {
             email: userCredential.user.email as string,
           },
         });
+        console.log("Logaydo");
         await setDoc(doc(db, "user", res.user.uid), {
           ...user,
           Timestamp: serverTimestamp(),
@@ -165,7 +150,6 @@ const Register = () => {
                 type="checkbox"
                 value=""
                 className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800"
-                required
               />
             </div>
             <label className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
