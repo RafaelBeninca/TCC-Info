@@ -54,6 +54,9 @@ const Servicos = () => {
             name: userData.name,
             isProfessional: userData.isProfessional,
             profilePicture: userData.profilePicture,
+            password: userData.password,
+            email: userData.email,
+            description: userData.description,
           });
         } else {
           console.log("No user found with the given authUid");
@@ -80,7 +83,7 @@ const Servicos = () => {
             {users.map((user) => (
               <a href={`/usuario/${user.id}`}>
               <div key={user.id} className="flex flex-col m-5 h-80 p-3 rounded w-60 bg-slate-200 justify-center align-middle">
-                <img src={user?.profilePicture ? user.profilePicture : blankpfp} className="w-full bg-slate-100 rounded"></img>
+                <img src={user?.profilePicture ? user.profilePicture : blankpfp} className="w-full h-full object-cover bg-slate-100 rounded"></img>
                 <div className="w-full h-10 mt-4 p-1 rounded bg-slate-100">
                   <p className="text-justify align-center text-2xl text-primary-dark font-semibold">{user.name}</p>
                 </div>

@@ -12,7 +12,7 @@ import DeleteAccountBtn from "../components/DeleteAccountBtn";
 import { CustomTableUser, Data } from "../components/Interfaces";
 import { auth, db, storage } from "../contexts/firebase/firebaseConfig";
 import useTableUserContext from "../hooks/useTableUserContext";
-import TagDisplay from "../components/TagDisplay";
+import TagModal from "../components/TagModal";
 import Description from "../components/Description";
 
 const Usuario: React.FC = () => {
@@ -139,7 +139,7 @@ const Usuario: React.FC = () => {
         <div className="flex flex-col h-full text-left align-middle">
           <div className="flex flex-row text-left align-middle">
           <img
-            className="mt-10 h-52 w-52 rounded-full transform hover:scale-105 hover:rounded-lg transition-all duration-500 object-cover"
+            className="mt-10 h-56 w-56 rounded-full transform hover:scale-105 hover:rounded-lg transition-all duration-500 object-cover"
             src={pageUser?.profilePicture ? pageUser.profilePicture : blankpfp}
             alt="Profile"
           />
@@ -150,7 +150,7 @@ const Usuario: React.FC = () => {
                     {pageUser?.name ? pageUser.name : "Usuário não encontrado..."}
                   </h1>
                   {user?.uid == userId && (
-                    <button className="hover:scale-125 transition-all" onClick={toggleModal}>
+                    <button className="hover:scale-110 transition-all" onClick={toggleModal}>
                     <svg className="ml-2 w-[30px] h-[30px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                       <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
                     </svg>
@@ -158,7 +158,7 @@ const Usuario: React.FC = () => {
                   )}
                   </div>
                 {!user?.isProfessional == true && (
-                  <TagDisplay/>
+                  <TagModal/>
                 )}
               </div>
               {!user?.isProfessional == true && (
