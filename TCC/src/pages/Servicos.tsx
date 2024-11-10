@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "../contexts/authContext";
-import { auth, db } from "../contexts/firebase/firebaseConfig";
-import "flowbite";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { CustomTableUser } from "../components/Interfaces";
+import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { DarkThemeToggle, Flowbite } from "flowbite-react";
+import "flowbite";
+import { Flowbite } from "flowbite-react";
+import { useEffect, useState } from "react";
 import blankpfp from "../assets/images/blankpfp.jpg";
+import { CustomTableUser } from "../components/Interfaces";
+import { auth, db } from "../contexts/firebase/firebaseConfig";
 
 const Servicos = () => {
   const [tableUser, setTableUser] = useState<CustomTableUser | null>(null);
@@ -79,12 +78,14 @@ const Servicos = () => {
         <div className="mt-7 bg bg-white dark:bg-slate-900">
           <div className="flex flex-row h-screen overflow-x-auto bg-gray-50 shadow-xl w-5/6 pl-6 mx-auto rounded-xl">
             {users.map((user) => (
+              <a href={`/usuario/${user.id}`}>
               <div key={user.id} className="flex flex-col m-5 h-80 p-3 rounded w-60 bg-slate-200 justify-center align-middle">
                 <img src={user?.profilePicture ? user.profilePicture : blankpfp} className="w-full bg-slate-100 rounded"></img>
                 <div className="w-full h-10 mt-4 p-1 rounded bg-slate-100">
                   <p className="text-justify align-center text-2xl text-primary-dark font-semibold">{user.name}</p>
                 </div>
               </div>
+              </a>
             ))}
           </div>
         </div>

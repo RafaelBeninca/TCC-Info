@@ -41,6 +41,9 @@ const TableUserContextProvider = ({
             name: userData.name,
             isProfessional: userData.isProfessional,
             profilePicture: userData.profilePicture,
+            email: userData.email,
+            password: userData.password,
+            description: userData.description,
           });
         } else {
           console.log(

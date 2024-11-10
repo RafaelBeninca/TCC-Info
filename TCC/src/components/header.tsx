@@ -1,13 +1,11 @@
 import { signOut } from "firebase/auth";
-import { Avatar } from "flowbite-react";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import logo from "../assets/images/Logo.png";
 import blankpfp from "../assets/images/blankpfp.jpg";
+import { FirebaseAuthContext } from "../contexts/AuthenticationProvider/FirebaseAuthContext";
 import { auth } from "../contexts/firebase/firebaseConfig";
 import useTableUserContext from "../hooks/useTableUserContext";
-import { CustomTableUser } from "./Interfaces";
-import { FirebaseAuthContext } from "../contexts/AuthenticationProvider/FirebaseAuthContext";
 
 const Header = () => {
   const { user } = useTableUserContext();
@@ -81,7 +79,7 @@ const Header = () => {
               <li>
                 <a
                   href="/servicos"
-                  className="block py-2 px-3 text-gray-900 md:hover:bg-transparent transform hover:scale-105 hover:bg-gray-100 hover:text-primary-default transition-transform duration-300"
+                  className="block py-2 px-3 text-gray-900 md:hover:bg-transparent transform hover:scale-105 hover:bg-gray-100 hover:text-primary-dark transition-transform duration-300"
                   aria-current="page"
                 >
                   Serviços
@@ -90,7 +88,7 @@ const Header = () => {
               <li>
                 <a
                   href="/login"
-                  className="block py-2 px-3 text-gray-900 md:hover:bg-transparent transform hover:scale-105 hover:bg-gray-100 hover:text-primary-default transition-transform duration-300"
+                  className="block py-2 px-3 text-gray-900 md:hover:bg-transparent transform hover:scale-105 hover:bg-gray-100 hover:text-primary-dark transition-transform duration-300"
                 >
                   Login
                 </a>
@@ -102,16 +100,15 @@ const Header = () => {
               onClick={toggleDropdown}
               id="dropdownDefaultButton"
               data-dropdown-toggle="dropdown"
-              className="flex items-center space-x-3 rtl:space-x-reverse"
+              className="flex items-center space-x-3 rtl:space-x-reverse hover:scale-105 transition-transform duration-300"
               type="button"
             >
-              <Avatar
-                rounded
-                img={user?.profilePicture ? user.profilePicture : blankpfp}
-                className="w-10 h-10 rounded-full"
+              <img
+                className="w-10 h-10 rounded-full object-cover"
+                src={user?.profilePicture ? user.profilePicture : blankpfp}
                 alt="Profile"
               />
-              <p className="text-textcolor-dark hover:text-textcolor-lightHover dark:text-textcolor-light dark:hover:text-textcolor-darkHover">
+              <p className="block text-gray-900 md:hover:bg-transparent transform hover:scale-105 hover:bg-gray-100 hover:text-primary-light font-bold">
                 {user ? user.name : "Sem conta"}
               </p>
             </button>
@@ -120,7 +117,7 @@ const Header = () => {
                 <div className="py-1">
                   {user ? (
                     <>
-                      <a href="/usuario" className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      <a href={`/usuario/${user.uid}`} className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         <svg
                           className="w-6 h-6 mr-3 text-gray-800 dark:text-white"
                           aria-hidden="true"

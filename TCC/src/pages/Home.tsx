@@ -53,12 +53,16 @@ const Home = () => {
       <Flowbite>
         <div className=" h-screen mt-8 bg px-20 bg-white dark:bg-slate-900">
           {tableUser && (
-            <div className="flex flex-row mt-10">
-              <p className="pt-5 text-6xl font-medium">Bem-Vindo,</p>{" "}
-              <p className="pt-5 text-6xl font-bold text-primary-default">{user?.name}!</p>
+            <div className="">
+              <div className="flex flex-row mt-10">
+                <p className="pt-5 text-6xl font-medium">Bem-Vindo,</p>{" "}
+                <p className="pt-5 ml-4 text-6xl font-bold text-primary-default">
+                  {user?.name}!
+                </p>
+              </div>
+              <div className="h-0.5 mt-3 mb-10 w-auto bg-primary-default" />
             </div>
           )}
-          <div className="h-0.5 mt-3 mb-10 w-1/2 bg-primary-default"/>
           <div className="flex flex-col bg-gray-200 h-2/4 pl-6 mx-auto rounded-xl">
             <p className="pt-5 text-2xl">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc

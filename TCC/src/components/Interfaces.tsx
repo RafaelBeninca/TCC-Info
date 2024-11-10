@@ -17,4 +17,7 @@ export interface CustomTableUser {
   name: string;
   isProfessional: boolean;
   profilePicture: string;
+  email: string,
+  password: string,
+  description: string,
 }

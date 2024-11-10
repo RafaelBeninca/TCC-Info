@@ -8,23 +8,13 @@ import {
 import { Button, Modal } from "flowbite-react";
 import { useContext, useState } from "react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
-import { useNavigate } from "react-router-dom";
 import { auth, db } from "../contexts/firebase/firebaseConfig";
 import useTableUserContext from "../hooks/useTableUserContext";
 import { FirebaseAuthContext } from "../contexts/AuthenticationProvider/FirebaseAuthContext";
 
 const DeleteAccountBtn: React.FC = () => {
   const [openModal, setOpenModal] = useState<boolean>(false);
-  const navigate = useNavigate();
   const { user } = useTableUserContext();
-
-  const context = useContext(FirebaseAuthContext);
-
-  if (!context) {
-    throw new Error("FirebaseAuthContext must be used within a FirebaseAuthContextProvider");
-  }
-
-  const {dispatch} = context;
 
   async function handleDeleteAccount(
     uid: string,
@@ -72,6 +62,7 @@ const DeleteAccountBtn: React.FC = () => {
         size="sm"
         onClose={() => setOpenModal(false)}
         popup
+        className="fixed my-auto"
       >
         <Modal.Header />
         <Modal.Body>
