@@ -35,43 +35,6 @@ const Servicos = () => {
     fetchUsers();
   }, []);
 
-  useEffect(() => {
-    let uid: string;
-    const listen = onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
-
-      uid = user.uid;
-      if (user) {
-        const userRef = collection(db, "user");
-        const q = query(userRef, where("authUid", "==", uid));
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty && querySnapshot.docs[0]) {
-          const userData = querySnapshot.docs[0].data();
-
-          setTableUser({
-            uid: userData.uid,
-            name: userData.name,
-            isProfessional: userData.isProfessional,
-            profilePicture: userData.profilePicture,
-            password: userData.password,
-            email: userData.email,
-            description: userData.description,
-          });
-        } else {
-          console.log("No user found with the given authUid");
-          setTableUser(null);
-        }
-      } else {
-        setTableUser(null);
-      }
-    });
-
-    return () => {
-      listen();
-    };
-  }, []);
-
   return (
     <>
       <Flowbite>

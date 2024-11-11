@@ -21,3 +21,8 @@ export interface CustomTableUser {
   password: string,
   description: string,
 }
+
+export interface JoinTagsUser {
+  userId: string,
+  tagsId: string,
+}
