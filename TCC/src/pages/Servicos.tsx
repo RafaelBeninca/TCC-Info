@@ -1,14 +1,10 @@
-import { onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import "flowbite";
 import { Flowbite } from "flowbite-react";
 import { useEffect, useState } from "react";
-import blankpfp from "../assets/images/blankpfp.jpg";
-import { CustomTableUser } from "../components/Interfaces";
-import { auth, db } from "../contexts/firebase/firebaseConfig";
+import { db } from "../contexts/firebase/firebaseConfig";
 
 const Servicos = () => {
-  const [tableUser, setTableUser] = useState<CustomTableUser | null>(null);
   const [users, setUsers] = useState<UserList[]>([]);
 
   type UserList = {
@@ -38,21 +34,25 @@ const Servicos = () => {
   return (
     <>
       <Flowbite>
-        <p className="pt-5 m-10 text-6xl text-primary-dark font-semibold">
-          Serviços de {"..."} encontrados
+        <p className="m-7 text-6xl text-primary-dark font-semibold">
+          Lista de serviços
         </p>
-        <div className="mt-7 bg bg-white dark:bg-slate-900">
-          <div className="flex flex-row h-screen overflow-x-auto bg-gray-50 shadow-xl w-5/6 pl-6 mx-auto rounded-xl">
-            {users.map((user) => (
-              <a href={`/usuario/${user.id}`}>
-              <div key={user.id} className="flex flex-col m-5 h-80 p-3 rounded w-60 bg-slate-200 justify-center align-middle">
-                <img src={user?.profilePicture ? user.profilePicture : blankpfp} className="w-full h-full object-cover bg-slate-100 rounded"></img>
-                <div className="w-full h-10 mt-4 p-1 rounded bg-slate-100">
-                  <p className="text-justify align-center text-2xl text-primary-dark font-semibold">{user.name}</p>
+        <div className="bg-white mt-7 w-full px-8">
+          <div className="bg-gray-100 flex flex-row h-screen overflow-x-auto shadow-xl w-full mx-auto rounded-xl">
+            <div className="w-60 h-80 m-5 rounded-b-lg shadow-md hover:scale-105 transition-all duration-300 hover:shadow-xl">
+              <div className="bg-primary-default rounded-t-lg w-full h-4"/>
+              <div className="p-2">
+                <p className="font-semibold text-2xl">Ajuda com tal coisa</p>
+                <hr className="bg-primary-default my-2"/>
+                <span className="font-bold">R$: 99.99</span>
+                <div className="bg-orange-300 w-full h-full">
+                  <p className="h-full w-full whitespace-normal line-clamp-6 break-words overflow-hidden text-ellipsis"> Descrição do serviço requisitado pelo usuário</p>
                 </div>
+                {/* <div className="bg-red-500 h-2 w-2 mt-auto">
+                  <h2>Usuário</h2>
+                </div> */}
               </div>
-              </a>
-            ))}
+            </div>
           </div>
         </div>
       </Flowbite>

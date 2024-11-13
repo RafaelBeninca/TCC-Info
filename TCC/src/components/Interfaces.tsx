@@ -24,5 +24,10 @@ export interface CustomTableUser {
 
 export interface JoinTagsUser {
   userId: string,
-  tagsId: string,
+  tagId: string,
 }
+
+export interface Tag {
+  id: string;
+  tagName: string;
+};

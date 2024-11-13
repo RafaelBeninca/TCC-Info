@@ -30,12 +30,6 @@ const Register = () => {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const navigate = useNavigate();
 
-  // onAuthStateChanged(auth, (user) => {
-  //   if (user) {
-  //     uid = user.uid
-  //   }
-  // })
-
   const signUp = async (e: FormEvent) => {
     e.preventDefault();
     if (!isSigningIn) {
@@ -57,7 +51,6 @@ const Register = () => {
             email: userCredential.user.email as string,
           },
         });
-        console.log("Logaydo");
         await setDoc(doc(db, "user", res.user.uid), {
           ...user,
           Timestamp: serverTimestamp(),
@@ -68,29 +61,6 @@ const Register = () => {
         console.log("Erro ao Registrar usuário: " + error);
         setToggleError(true);
       }
-
-      // const res = await createUserWithEmailAndPassword(
-      //   auth,
-      //   user.email,
-      //   user.password
-      // )
-      //   .then( async (userCredential: UserCredential) => {
-      //     console.log("Usuário registrado com sucesso: "+userCredential);
-      //     const docRef = await addDoc(userCollectionRef, {
-      //       name: user.name,
-      //       authUid: uid,
-      //       Timestamp: serverTimestamp()
-      //     });
-      //     console.log(docRef.id);
-      //     setToggleError(false)
-      //     navigate("/");
-      //   })
-      //   .catch((error: FirebaseError) => {
-      //     console.log("caca");
-      //     setToggleError(true)
-      //     console.log(error.code)
-      //     console.log(error);
-      //   });
     }
   };
 

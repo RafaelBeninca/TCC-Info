@@ -6,6 +6,7 @@ import { db } from "../firebase/firebaseConfig";
 
 interface ITableUserContext {
   user: CustomTableUser | null;
+  setUser: React.Dispatch<React.SetStateAction<CustomTableUser | null>>
 }
 
 const TableUserContext = createContext<ITableUserContext | null>(null);
@@ -65,7 +66,7 @@ const TableUserContextProvider = ({
   }, [currentUser]);
 
   return (
-    <TableUserContext.Provider value={{ user }}>
+    <TableUserContext.Provider value={{ user, setUser }}>
       {children}
     </TableUserContext.Provider>
   );

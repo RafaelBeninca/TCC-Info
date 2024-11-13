@@ -1,41 +1,187 @@
 import { useState } from "react";
+import { JoinTagsUser, Tag } from "./Interfaces";
+import SelectTag from "./SelectTag";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../contexts/firebase/firebaseConfig";
 import useTableUserContext from "../hooks/useTableUserContext";
 import TagDisplay from "./TagDisplay";
 
-const TagModal: React.FC = () => {
-  const [openModal, setOpenModal] = useState<boolean>(false)
+interface TagModalProps {
+  tags: Tag[];
+}
+
+const TagModal: React.FC<TagModalProps> = ({ tags }) => {
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [visibleError, setVisibleError] = useState<boolean>(false)
+  const [error, setError] = useState<string>("");
+  const [tagUser, setTagUser] = useState<JoinTagsUser>({
+    userId: "",
+    tagId: "",
+  });
+
   const { user } = useTableUserContext();
 
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setTagUser({ ...tagUser, tagId: e.target.value });
+  };
+
+  const closeError = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    setVisibleError(false)
+  };
+
   const toggleModal = () => {
+    setVisibleError(false)
     setOpenModal(!openModal);
+  };
+
+  const addTag = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      if (!tagUser.tagId || !user) return;
+      console.log(tagUser.tagId);
+      const docRef = collection(db, "joinTagsUser");
+      const idUserQuery = query(docRef, where("userId", "==", user.uid));
+      const queryUserSnapshot = await getDocs(idUserQuery);
+
+      const idTagQuery = query(docRef, where("tagId", "==", tagUser.tagId));
+      const queryTagSnapshot = await getDocs(idTagQuery);
+      console.log(queryTagSnapshot);
+
+      if (!queryTagSnapshot.empty) {
+        setError("Você já possui esta tag!");
+        setVisibleError(true)
+        return;
+      } else if (queryUserSnapshot.size >= 3) {
+        setError("Limite de tags excedido!");
+        setVisibleError(true)
+        return;
+      }
+
+      const joinRef = await addDoc(docRef, {
+        ...tagUser,
+        userId: user.uid,
+      });
+
+      setTagUser({
+        ...tagUser,
+      })
+      console.log("Tag adicionada ao usuário com sucesso: ", joinRef.id);
+      // }
+    } catch (error) {
+      console.error("Erro ao adicionar tag ao usuário: ", error);
+    }
   };
 
   return (
     <>
-      <button className="mt-3" onClick={toggleModal}>
-        <div className="flex flex-row gap-1 rounded-full h-7 w-16 bg-slate-100 hover:bg-slate-200 border-primary-default hover:border-primary-dark border-2 hover:scale-110 transition-all">
-          <svg className="w-6 h-6 text-primary-default hover:text-primary-dark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+      <button className="w-fit mt-2" onClick={toggleModal}>
+        <div className="bg-primary-default flex flex-row gap-1 rounded-lg h-7 w-16 hover:bg-primary-light border-2 hover:scale-110 transition-all">
+          <svg
+            className="text-textcolor-light w-6 h-6"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 12h14m-7 7V5"
+            />
           </svg>
-          <span className="font-semibold text-primary-default hover:text-primary-dark">Tag</span>
+          <span className="font-semibold text-textcolor-light">Tag</span>
         </div>
       </button>
       {openModal && ( // Modal
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-slate-100 w-1/2 h-1/3 m-auto rounded-lg shadow-xl">
-            <div className="w-full h-5 bg-primary-default rounded-t-lg"></div>
-            <div className="flex flex-row">
-              <h2 className="p-4 text-4xl font-bold"> Adicionar Tags </h2>
-              <button className="my-auto ml-auto m-5" onClick={toggleModal}>
-                <svg className="w-[40px] h-[40px] text-warning-default hover:text-warning-dark dark:text-white my-auto hover:scale-125 transition-all" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/>
-                </svg>
-              </button>
+        <form onSubmit={addTag}>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-slate-100 w-1/2 max-h-90 min-h-90 pb-5 m-auto rounded-lg shadow-xl">
+              <div className="bg-primary-default w-full h-5 rounded-t-lg"></div>
+              <div className="flex flex-row">
+                <h2 className="p-4 text-4xl font-bold"> Adicionar Tags </h2>
+                <button className="my-auto ml-auto m-5" onClick={toggleModal}>
+                  <svg
+                    className="w-[40px] h-[40px] text-warning-default hover:text-warning-dark dark:text-white my-auto hover:scale-125 transition-all"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18 17.94 6M18 18 6.06 6"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <hr className="border-primary-default mx-2" />
+              <p className="text-gray-500 pl-2">
+                Um usuário pode ter até 3 tags profissionalizantes diferentes.
+              </p>
+              <div className="flex flex-row p-3 align-middle gap-3">
+                <SelectTag
+                  selectedOptionId={tagUser.tagId}
+                  onChange={handleChange}
+                />
+                <div className="flex flex-row gap-1">
+                  <button
+                    className="bg-primary-default hover:bg-primary-dark rounded-md w-20 h-8 my-auto text-textcolor-light font-semibold"
+                    type="submit"
+                  >
+                    <p>Adicionar</p>
+                  </button>
+                  <button
+                    className="bg-warning-default hover:bg-warning-dark rounded-md w-20 h-8 my-auto text-textcolor-light font-semibold"
+                    type="submit"
+                  >
+                    <p>Deletar</p>
+                  </button>
+                </div>
+                {visibleError === true && (
+                <div className="flex flex-row my-auto gap-2">
+                  <p className="text-warning-default font-semibold">
+                    {" "}
+                    {error}{" "}
+                  </p>
+                  <button className="my-auto ml-auto m-5" onClick={closeError}>
+                    <svg
+                      className="w-[20px] h-[20px] text-warning-default hover:text-warning-dark"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18 17.94 6M18 18 6.06 6"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                )}
+              </div>
+              <h1 className="font-semibold ml-4 mb-5">Tags do usuário: </h1>
+              <div className="ml-4">
+                <TagDisplay tags={tags} />
+              </div>
             </div>
-            <hr className="border-primary-default mx-2"/>
-            <TagDisplay></TagDisplay>
           </div>
-        </div>
+        </form>
       )}
     </>
   );
