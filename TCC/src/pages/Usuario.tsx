@@ -57,7 +57,6 @@ const Usuario: React.FC = () => {
         for (const docum of userSnapshot.docs) {
           const docRef = doc(db, "tags", docum.data().tagId);
           const tagDoc = await getDoc(docRef);
-          console.log(tagDoc.data());
           if (tagDoc.exists()) {
             const tag = tagDoc.data();
             tags.push({

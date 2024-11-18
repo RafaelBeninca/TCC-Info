@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { JoinTagsUser, Tag } from "./Interfaces";
 import SelectTag from "./SelectTag";
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, query, where } from "firebase/firestore";
 import { db } from "../contexts/firebase/firebaseConfig";
 import useTableUserContext from "../hooks/useTableUserContext";
 import TagDisplay from "./TagDisplay";
@@ -62,11 +62,45 @@ const TagModal: React.FC<TagModalProps> = ({ tags }) => {
         ...tagUser,
         userId: user.uid,
       });
+      alert("Tag adicionada com sucesso.")
 
       setTagUser({
         ...tagUser,
       })
       console.log("Tag adicionada ao usuário com sucesso: ", joinRef.id);
+      // }
+    } catch (error) {
+      console.error("Erro ao adicionar tag ao usuário: ", error);
+    }
+  };
+
+  const deleteTag = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault();
+    console.log("DeleteTag")
+    try {
+      if (!tagUser.tagId || !user) return;
+      const docRef = collection(db, "joinTagsUser");
+      // const idUserQuery = query(docRef, where("userId", "==", user.uid));
+      // const queryUserSnapshot = await getDocs(idUserQuery);
+
+      const idTagQuery = query(docRef, where("tagId", "==", tagUser.tagId));
+      const queryTagSnapshot = await getDocs(idTagQuery);
+
+      if (queryTagSnapshot.empty) {
+        setError("Não é possível excluir essa tag!");
+        setVisibleError(true)
+        return;
+      }
+
+      for (const docSnapshot of queryTagSnapshot.docs) {
+        await deleteDoc(doc(db, "joinTagsUser", docSnapshot.id));
+        console.log(`Deleted document with ID: ${docSnapshot.id}`);
+      }
+      alert("Tag deletada com sucesso.")
+
+      setTagUser({
+        ...tagUser,
+      })
       // }
     } catch (error) {
       console.error("Erro ao adicionar tag ao usuário: ", error);
@@ -141,8 +175,9 @@ const TagModal: React.FC<TagModalProps> = ({ tags }) => {
                     <p>Adicionar</p>
                   </button>
                   <button
+                  type="button"
+                  onClick={deleteTag}
                     className="bg-warning-default hover:bg-warning-dark rounded-md w-20 h-8 my-auto text-textcolor-light font-semibold"
-                    type="submit"
                   >
                     <p>Deletar</p>
                   </button>
