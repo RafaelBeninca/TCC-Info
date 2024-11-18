@@ -23,6 +23,7 @@ import TagDisplay from "../components/TagDisplay";
 import TagModal from "../components/TagModal";
 import { auth, db, storage } from "../contexts/firebase/firebaseConfig";
 import useTableUserContext from "../hooks/useTableUserContext";
+import SecondaryInfo from "../components/secondaryInfo";
 
 const Usuario: React.FC = () => {
   const [isVerified, setIsVerified] = useState<boolean>(false);
@@ -72,7 +73,7 @@ const Usuario: React.FC = () => {
     };
 
     fetchTags();
-  }, [user, tags]);
+  }, [user]);
 
   const toggleModal = () => {
     setOpenModal(!openModal);
@@ -245,6 +246,7 @@ const Usuario: React.FC = () => {
           </div>
         </div>
       </div>
+      <SecondaryInfo/>
       {openModal && ( // Modal
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-slate-100 w-1/2 m-auto rounded-lg shadow-xl">
@@ -252,7 +254,7 @@ const Usuario: React.FC = () => {
             <form onSubmit={handleSubmit}>
               <div className="flex flex-row">
                 <h2 className="p-4 text-4xl font-bold">
-                  Alterar informações da conta
+                  Alterar informações pessoais
                 </h2>
                 <button className="my-auto ml-auto m-5" onClick={toggleModal}>
                   <svg
