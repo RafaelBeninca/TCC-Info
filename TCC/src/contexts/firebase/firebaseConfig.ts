@@ -1,11 +1,10 @@
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+// import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
-import { setLogLevel } from "firebase/firestore";
-
-setLogLevel("debug")
+// import { setLogLevel } from "firebase/firestore";
+// setLogLevel("debug")
 
 const firebaseConfig = {
   databaseURL: "https://tccinfo-82f7e-default-rtdb.firebaseio.com",//import.meta.env.VITE_FIREBASE_DATABASE_URL,
@@ -21,7 +20,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app)
 const auth = getAuth();
-const analytics = getAnalytics(app);
+// const analytics = getAnalytics(app);
 const db = getFirestore(app)
 
 export {app, auth, db, storage}

@@ -8,9 +8,11 @@ import TagDisplay from "./TagDisplay";
 
 interface TagModalProps {
   tags: Tag[];
+  refresh: boolean
+  setRefresh: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const TagModal: React.FC<TagModalProps> = ({ tags }) => {
+const TagModal: React.FC<TagModalProps> = ({ tags, refresh, setRefresh }) => {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [visibleError, setVisibleError] = useState<boolean>(false)
   const [error, setError] = useState<string>("");
@@ -72,6 +74,7 @@ const TagModal: React.FC<TagModalProps> = ({ tags }) => {
     } catch (error) {
       console.error("Erro ao adicionar tag ao usuário: ", error);
     }
+    setRefresh(!refresh)
   };
 
   const deleteTag = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -105,6 +108,7 @@ const TagModal: React.FC<TagModalProps> = ({ tags }) => {
     } catch (error) {
       console.error("Erro ao adicionar tag ao usuário: ", error);
     }
+    setRefresh(!refresh)
   };
 
   return (

@@ -34,6 +34,7 @@ const Usuario: React.FC = () => {
   // const [message, setMessage] = useState<string>("");
   // const [loading, setLoading] = useState(true);
   const [tags, setTags] = useState<Tag[]>([]);
+  const [refresh, setRefresh] = useState<boolean>(false)
 
   const { userId } = useParams<{ userId: string }>();
   const { user, setUser } = useTableUserContext();
@@ -73,7 +74,7 @@ const Usuario: React.FC = () => {
     };
 
     fetchTags();
-  }, [user]);
+  }, [user, refresh]);
 
   const toggleModal = () => {
     setOpenModal(!openModal);
@@ -230,10 +231,10 @@ const Usuario: React.FC = () => {
                     </button>
                   )}
                 </div>
-                {!user?.isProfessional == true && (
+                {user?.uid == userId && (
                   <div className="flex flex-col min-w-1 h-full">
                     <TagDisplay tags={tags} />
-                    <TagModal tags={tags} />
+                    <TagModal tags={tags} refresh={refresh} setRefresh={setRefresh} />
                   </div>
                 )}
               </div>
