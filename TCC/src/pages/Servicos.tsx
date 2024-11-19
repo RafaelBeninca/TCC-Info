@@ -43,24 +43,28 @@ const Servicos = () => {
           Lista de serviços
         </p>
         <div className="bg-white mt-7 w-full px-8">
-          <div className="bg-gray-100 flex flex-row h-screen overflow-x-auto shadow-xl w-full mx-auto rounded-xl">
-            {/* Cards */}
-            <button className="w-60 h-80 m-5" onClick={toggleModal}>
-              <div className="w-60 h-80 rounded-b-lg shadow-md hover:scale-105 transition-all duration-300 hover:shadow-xl">
-                <div className="bg-primary-default rounded-t-lg w-full h-4" />
-                <div className="p-2 text-left">
-                  <p className="font-semibold text-2xl">Ajuda com tal coisa</p>
-                  <hr className="bg-primary-default my-2" />
-                  <span className="font-bold">R$: 99.99</span>
-                  <div className="w-full h-20">
-                    <p className="whitespace-normal line-clamp-3 break-words overflow-hidden text-ellipsis">
-                      Descrição do serviço requisitado pelo usuário
-                    </p>
+          <div className="bg-gray-100 flex flex-col h-screen overflow-x-auto shadow-xl w-full mx-auto rounded-xl">
+            <div className="bg-primary-default rounded-t-lg w-full h-3"/>
+            <div className="bg-gray-200 w-full h-16 border-b-4 border-primary-default"></div>
+            <div className="bg-gray-100 flex flex-row">
+              {/* Cards */}
+              <button className="w-60 h-80 m-5" onClick={toggleModal}>
+                <div className="w-60 h-80 rounded-b-lg shadow-md hover:scale-105 transition-all duration-300 hover:shadow-xl">
+                  <div className="bg-primary-default rounded-t-lg w-full h-4" />
+                  <div className="p-2 text-left">
+                    <p className="font-semibold text-2xl">Ajuda com tal coisa</p>
+                    <hr className="bg-primary-default my-2" />
+                    <span className="font-bold">R$: 99.99</span>
+                    <div className="w-full h-20">
+                      <p className="whitespace-normal line-clamp-3 break-words overflow-hidden text-ellipsis">
+                        Descrição do serviço requisitado pelo usuário
+                      </p>
+                    </div>
+                    <div className="bg-orange-600 rounded-lg w-full h-32" />
                   </div>
-                  <div className="bg-orange-600 rounded-lg w-full h-32" />
                 </div>
-              </div>
-            </button>
+              </button>
+            </div>
             {openModal && ( // Modal
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="scrollable-container bg-slate-100 w-2/3 h-3/4 m-auto rounded-lg shadow-xl overflow-y-auto">

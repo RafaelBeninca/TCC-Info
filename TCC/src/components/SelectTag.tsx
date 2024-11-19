@@ -35,7 +35,7 @@ const SelectTag: React.FC<SelectTagProps> = ({selectedOptionId, onChange}) => {
   }, []);
 
   return (
-    <select className=" h-10" value={selectedOptionId} onChange={onChange}>
+    <select className=" h-10 border-primary-dark border-2 bg-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-primary-default focus:border-primary-default overflow-y-auto hover:shadow-lg transition-all" value={selectedOptionId} onChange={onChange}>
       <option value="" disabled>Selecione uma tag </option>
         {options.map(option => (
           <option key={option.id} value={option.id}>

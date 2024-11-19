@@ -20,13 +20,12 @@ export interface CustomTableUser {
   email: string,
   password: string,
   description: string,
-  displayCity: string,
+  city: string,
   displayEmail: string,
   displayPhone: string,
 }
 
 export interface SecDisplayInfo {
-  displayCity: string,
   displayEmail: string,
   displayPhone: string,
 }

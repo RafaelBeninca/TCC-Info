@@ -23,7 +23,8 @@ import TagDisplay from "../components/TagDisplay";
 import TagModal from "../components/TagModal";
 import { auth, db, storage } from "../contexts/firebase/firebaseConfig";
 import useTableUserContext from "../hooks/useTableUserContext";
-import SecondaryInfo from "../components/secondaryInfo";
+import SecondaryInfo from "../components/SecondaryInfo";
+import SelectCity from "../components/SelectCity";
 
 const Usuario: React.FC = () => {
   const [isVerified, setIsVerified] = useState<boolean>(false);
@@ -31,6 +32,7 @@ const Usuario: React.FC = () => {
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [pageUser, setPageUser] = useState<CustomTableUser | null>(null);
   const [openModal, setOpenModal] = useState<boolean>(false);
+  const [city, setCity] = useState<string>("")
   // const [message, setMessage] = useState<string>("");
   // const [loading, setLoading] = useState(true);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -52,7 +54,7 @@ const Usuario: React.FC = () => {
       if (!user) return;
       try {
         const userTagsCollection = collection(db, "joinTagsUser");
-        const q = query(userTagsCollection, where("userId", "==", user.uid));
+        const q = query(userTagsCollection, where("userId", "==", userId));
         const userSnapshot = await getDocs(q);
 
         const tags: Tag[] = [];
@@ -74,7 +76,11 @@ const Usuario: React.FC = () => {
     };
 
     fetchTags();
-  }, [user, refresh]);
+  }, [user, userId, refresh]);
+
+  const handleChangeCity = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCity(e.target.value);
+  };
 
   const toggleModal = () => {
     setOpenModal(!openModal);
@@ -188,6 +194,7 @@ const Usuario: React.FC = () => {
 
   return (
     <div className="p-10 h-3/4">
+      <p className="pb-5 text-4xl font-medium text-primary-default"> {user?.uid == userId ? "Meu perfil" : "Perfil de " + pageUser?.name}</p>
       <div className="w-full bg-slate-200 min-h-none max-h-none p-6 shadow-xl mx-auto rounded-xl">
         <div className="flex flex-col min-h-full text-left align-middle">
           <div className="flex flex-row h-full text-left align-middle min-h-none w-full">
@@ -231,20 +238,20 @@ const Usuario: React.FC = () => {
                     </button>
                   )}
                 </div>
-                {user?.uid == userId && (
                   <div className="flex flex-col min-w-1 h-full">
                     <TagDisplay tags={tags} />
+                    {user?.uid == userId && (
                     <TagModal tags={tags} refresh={refresh} setRefresh={setRefresh} />
+                    )}
                   </div>
-                )}
               </div>
-              {!user?.isProfessional == true && (
-                <div className="pl-7">
-                  <Description />
-                </div>
-              )}
+              <div className="pl-7">
+                <Description />
+              </div>
             </div>
           </div>
+          <hr className="bg-primary-dark mt-10 w-full h-0.5"></hr>
+          <SelectCity/>
         </div>
       </div>
       <SecondaryInfo/>

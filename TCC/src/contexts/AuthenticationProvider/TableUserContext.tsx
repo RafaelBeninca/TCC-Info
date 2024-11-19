@@ -45,7 +45,7 @@ const TableUserContextProvider = ({
             email: userData.email,
             password: userData.password,
             description: userData.description,
-            displayCity: userData.displayCity,
+            city: userData.city,
             displayEmail: userData.displayEmail,
             displayPhone: userData.displayPhone,
           });

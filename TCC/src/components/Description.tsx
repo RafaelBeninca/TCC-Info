@@ -95,12 +95,7 @@ const Description = () => {
       )}
       {(user?.uid !== userId || editable == false) && (
         <div className="flex flex-row h-full">
-            <p
-              className="h-full w-full whitespace-normal line-clamp-6 break-words overflow-hidden text-ellipsis"
-            >
-              {" "}
-              {description}{" "}
-            </p>
+            <p className="h-full w-full whitespace-normal line-clamp-6 break-words overflow-hidden text-ellipsis"> {description} </p>
           {user?.uid == userId ? (
             <button
               className="flex flex-row w-8 h-8 hover:scale-110 transition-all duration-300"
