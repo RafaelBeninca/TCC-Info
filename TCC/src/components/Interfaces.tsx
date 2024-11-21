@@ -36,6 +36,17 @@ export interface JoinTagsUser {
 }
 
 export interface Tag {
-  id: string;
-  tagName: string;
+  id: string,
+  tagName: string,
 };
+
+export interface Service {
+  ownerId: string,
+  claimedId: string,
+  tagId: string,
+  title: string,
+  description: string,
+  value: string,
+  image: string,
+  status: boolean,
+}

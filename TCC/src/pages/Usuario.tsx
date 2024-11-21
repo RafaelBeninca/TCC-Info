@@ -32,7 +32,6 @@ const Usuario: React.FC = () => {
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [pageUser, setPageUser] = useState<CustomTableUser | null>(null);
   const [openModal, setOpenModal] = useState<boolean>(false);
-  const [city, setCity] = useState<string>("")
   // const [message, setMessage] = useState<string>("");
   // const [loading, setLoading] = useState(true);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -77,10 +76,6 @@ const Usuario: React.FC = () => {
 
     fetchTags();
   }, [user, userId, refresh]);
-
-  const handleChangeCity = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCity(e.target.value);
-  };
 
   const toggleModal = () => {
     setOpenModal(!openModal);
@@ -256,8 +251,8 @@ const Usuario: React.FC = () => {
       </div>
       <SecondaryInfo/>
       {openModal && ( // Modal
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-slate-100 w-1/2 m-auto rounded-lg shadow-xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={toggleModal}>
+          <div className="bg-slate-100 w-1/2 m-auto rounded-lg shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="w-full h-5 bg-primary-default rounded-t-lg"></div>
             <form onSubmit={handleSubmit}>
               <div className="flex flex-row">
@@ -289,7 +284,7 @@ const Usuario: React.FC = () => {
                 Nome:
                 <input
                   type="text"
-                  className="block mb-2 border-2 hover:border-primary-default hover:shadow-lg focus:border-primary-dark transition-all pl-2 text-sm text-gray-900 dark:text-white py-2"
+                  className="block mb-2 border-2 hover:border-primary-default hover:shadow-lg focus:border-primary-dark transition-all focus:ring-primary-default"
                   style={{ width: "70%" }}
                   placeholder="Digite seu novo nome"
                   value={data.name}
@@ -300,7 +295,7 @@ const Usuario: React.FC = () => {
                 Email:
                 <input
                   type="email"
-                  className="block mb-2 border-2 hover:border-primary-default hover:shadow-lg focus:border-primary-dark transition-all pl-2 text-sm text-gray-900 dark:text-white py-2"
+                  className="block mb-2 border-2 hover:border-primary-default hover:shadow-lg focus:border-primary-dark transition-all focus:ring-primary-default"
                   style={{ width: "70%" }}
                   placeholder="Digite seu novo e-mail"
                   value={data.email}
@@ -311,7 +306,7 @@ const Usuario: React.FC = () => {
                 Senha:
                 <input
                   type="password"
-                  className="block mb-2 border-2 hover:border-primary-default hover:shadow-lg focus:border-primary-dark transition-all pl-2 text-sm text-gray-900 dark:text-white py-2"
+                  className="block mb-2 border-2 hover:border-primary-default hover:shadow-lg focus:border-primary-dark transition-all focus:ring-primary-default"
                   style={{ width: "70%" }}
                   placeholder="Digite sua nova senha"
                   value={data.password}

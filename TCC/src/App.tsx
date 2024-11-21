@@ -7,7 +7,7 @@ import Error from "./pages/Error";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Servicos from "./pages/Servicos";
+import Servicos from "./pages/Services";
 import Usuario from "./pages/Usuario";
 
 function App() {
