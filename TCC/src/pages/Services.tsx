@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import blankimg from "../assets/images/blankimg.jpg";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import DisplayServices from "../components/displayServices";
+import { v4 as uuidv4 } from "uuid";
 
 const Servicos = () => {
   // const [users, setUsers] = useState<UserList[]>([]);
@@ -22,6 +23,8 @@ const Servicos = () => {
   const [searchCity, setSearchCity] = useState<string>("");
   const [priceRange, setPriceRange] = useState<string>("");
   const [services, setServices] = useState<Service[]>([]);
+  const [refresh, setRefresh] = useState<boolean>(false)
+  
   const [serviceData, setServiceData] = useState<Service>({
     ownerId: "",
     claimedId: "",
@@ -47,6 +50,7 @@ const Servicos = () => {
       ...serviceData,
       claimedId: "",
       title: "",
+      image: "",
       description: "",
       value: "",
       ownerId: user?.uid || "",
@@ -75,7 +79,8 @@ const Servicos = () => {
       let url = serviceData.image || "";
 
       if (image) {
-        const storageRef = ref(storage, `serviceImages/${user?.uid}.jpg`);
+        const id = uuidv4();
+        const storageRef = ref(storage, `serviceImages/${id}.jpg`);
         await uploadBytes(storageRef, image);
         console.log("Upload de imagem realizado com sucesso!");
         url = await getDownloadURL(storageRef);
@@ -94,6 +99,7 @@ const Servicos = () => {
     } finally {
       setOpenCreateModal(!openCreateModal)
       setbtnText("Confirmar")
+      setRefresh(!refresh)
     }
   }
 
@@ -153,11 +159,8 @@ const Servicos = () => {
   return (
     <>
       <Flowbite>
-        <p className="m-7 text-6xl text-primary-dark font-semibold">
-          Lista de serviços
-        </p>
         <div className="bg-white mt-7 w-full px-8">
-          <div className="bg-gray-100 flex flex-col h-screen overflow-x-auto shadow-xl w-full mx-auto rounded-xl">
+          <div className="bg-gray-100 overflow-y-hidden flex flex-col h-screen overflow-x-auto shadow-xl w-full mx-auto rounded-xl">
             <div className="bg-primary-default rounded-t-lg w-full h-3"/>
             <div className="bg-gray-100 flex gap-3 flex-row w-full h-20 border-b-4 border-primary-default">
               <button className="flex flex-row pl-2 bg-primary-default h-12 w-1/6 my-auto rounded-xl mx-5 hover:bg-primary-dark hover:scale-105 transition-all duration-300" onClick={toggleCreateModal}>
@@ -181,7 +184,6 @@ const Servicos = () => {
                 <p className="font-bold text-white text-xl text-center my-auto">Requisitar serviço</p>
               </button>
               <hr className="bg-primary-default w-1 my-auto h-14"/>
-              <p className="font-bold my-auto text-3xl text-center">Filtros:</p>
               {/* Barra de pesquisa */}
               <input
                 className="block border-2 h-1/2 w-1/4 my-auto mx-4 hover:border-primary-default hover:shadow-lg focus:border-primary-dark focus:ring-primary-default transition-all"
@@ -191,17 +193,8 @@ const Servicos = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               >
               </input>
-              {/* Select de Tags */}
-              <select className="h-10 w-36 my-auto border-2 bg-transparent border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-primary-default focus:border-primary-default overflow-y-auto hover:shadow-lg transition-all"> 
-              </select>
-              {/* Select de Cidade */}
-              <select className="h-10 w-36 my-auto border-2 bg-transparent border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-primary-default focus:border-primary-default overflow-y-auto hover:shadow-lg transition-all"> 
-              </select>
-              {/* Select de Valor */}
-              <select className="h-10 w-36 my-auto border-2 bg-transparent border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-primary-default focus:border-primary-default overflow-y-auto hover:shadow-lg transition-all"> 
-              </select>
             </div>
-            <DisplayServices/>
+            <DisplayServices refresh={refresh}/>
             {openCreateModal && ( // Modal
             <form onSubmit={handleSubmit}>
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={toggleCreateModal}>

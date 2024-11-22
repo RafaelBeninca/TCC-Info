@@ -50,3 +50,8 @@ export interface Service {
   image: string,
   status: boolean,
 }
+
+export interface PriceRange {
+  priceMin: string,
+  priceMax: string,
+}

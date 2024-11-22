@@ -83,10 +83,10 @@ const TagModal: React.FC<TagModalProps> = ({ tags, refresh, setRefresh }) => {
     try {
       if (!tagUser.tagId || !user) return;
       const docRef = collection(db, "joinTagsUser");
-      // const idUserQuery = query(docRef, where("userId", "==", user.uid));
-      // const queryUserSnapshot = await getDocs(idUserQuery);
 
-      const idTagQuery = query(docRef, where("tagId", "==", tagUser.tagId));
+      const idTagQuery = query(docRef, 
+        where("tagId", "==", tagUser.tagId), 
+        where("userId", "==", tagUser.userId));
       const queryTagSnapshot = await getDocs(idTagQuery);
 
       if (queryTagSnapshot.empty) {
