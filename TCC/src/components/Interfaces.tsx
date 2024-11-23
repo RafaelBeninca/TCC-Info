@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export interface FormUser {
   name: string;
   email: string;
@@ -40,6 +42,11 @@ export interface Tag {
   tagName: string,
 };
 
+export interface SearchUser {
+  city: string,
+  uid: string,
+};
+
 export interface Service {
   ownerId: string,
   claimedId: string,
@@ -49,6 +56,8 @@ export interface Service {
   value: string,
   image: string,
   status: boolean,
+  city: string,
+  createdAt: Timestamp
 }
 
 export interface PriceRange {

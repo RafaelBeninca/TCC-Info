@@ -10,19 +10,15 @@ import blankimg from "../assets/images/blankimg.jpg";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import DisplayServices from "../components/displayServices";
 import { v4 as uuidv4 } from "uuid";
+import { Timestamp } from "firebase/firestore";
 
 const Servicos = () => {
   // const [users, setUsers] = useState<UserList[]>([]);
   const [openCreateModal, setOpenCreateModal] = useState<boolean>(false);
-  const [isSubmiting, setIsSubmiting] = useState<boolean>(false);
   const [btnText, setbtnText] = useState<string>("Confirmar")
   const [image, setImage] = useState<File | null>(null);
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchTagId, setSearchTagId] = useState<string>("");
-  const [searchCity, setSearchCity] = useState<string>("");
-  const [priceRange, setPriceRange] = useState<string>("");
-  const [services, setServices] = useState<Service[]>([]);
   const [refresh, setRefresh] = useState<boolean>(false)
   
   const [serviceData, setServiceData] = useState<Service>({
@@ -34,6 +30,8 @@ const Servicos = () => {
     image: "",
     value: "",
     status: false,
+    city: "",
+    createdAt: Timestamp.now(),
   })
 
   const { user } = useTableUserContext();
@@ -56,6 +54,7 @@ const Servicos = () => {
       ownerId: user?.uid || "",
       tagId: user?.description || "",
       status: false,
+      city: user?.city || "",
     });
   };
 
@@ -90,6 +89,7 @@ const Servicos = () => {
       const updatedServiceData = {
         ...serviceData,
         image: url,
+        createdAt: Timestamp.now()
       };
 
       console.log("Sucesso ao dar upload no servço!")
@@ -109,52 +109,6 @@ const Servicos = () => {
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`; // Set height to match content
     }
   };
-
-  useEffect(() => {
-    const fetchFilteredData = async () => {
-      try {
-        const productCollection = collection(db, "services");
-        let q = query(productCollection);
-
-        if (searchTerm) { //Filtro de Pesquisa por título
-          q = query(
-            q,
-            where("title", ">=", searchTerm ),
-            where("title", "<=", searchTerm + "\uf8ff")
-          );
-        }
-
-        if (searchTagId) { //Filtro de Tag ID
-          q = query(q, where("city", "==", searchTagId))
-        }
-
-        if (searchCity) { //Filtro de Cidade
-          q = query(q, where("city", "==", searchCity))
-        }
-
-        if (priceRange) { //Filtro de Valor
-          const [min, max] = priceRange.split("-").map(Number);
-          q = query(
-            q,
-            where("value", ">=", min),
-            where("value", "<=", max)
-          );
-        }
-
-        const querySnapshot = await getDocs(q);
-        const data: Service[] = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Service),
-        }));
-
-        setServices(data)
-      } catch (error) {
-        console.error("Erro ao filtrar as informações: ", error)
-      }
-    };
-
-    fetchFilteredData();
-  }, [searchTerm, searchTagId, searchCity, priceRange]);
 
   return (
     <>
@@ -184,15 +138,6 @@ const Servicos = () => {
                 <p className="font-bold text-white text-xl text-center my-auto">Requisitar serviço</p>
               </button>
               <hr className="bg-primary-default w-1 my-auto h-14"/>
-              {/* Barra de pesquisa */}
-              <input
-                className="block border-2 h-1/2 w-1/4 my-auto mx-4 hover:border-primary-default hover:shadow-lg focus:border-primary-dark focus:ring-primary-default transition-all"
-                type="text"
-                placeholder="Pesquisar por título..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              >
-              </input>
             </div>
             <DisplayServices refresh={refresh}/>
             {openCreateModal && ( // Modal
