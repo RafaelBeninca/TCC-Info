@@ -1,16 +1,15 @@
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, Timestamp } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import "flowbite";
 import { Flowbite } from "flowbite-react";
-import { useEffect, useRef, useState } from "react";
-import { db, storage } from "../contexts/firebase/firebaseConfig";
-import { Service } from "../components/Interfaces";
-import useTableUserContext from "../hooks/useTableUserContext";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import blankimg from "../assets/images/blankimg.jpg";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import DisplayServices from "../components/displayServices";
 import { v4 as uuidv4 } from "uuid";
-import { Timestamp } from "firebase/firestore";
+import blankimg from "../assets/images/blankimg.jpg";
+import DisplayServices from "../components/displayServices";
+import { Service } from "../components/Interfaces";
+import { db, storage } from "../contexts/firebase/firebaseConfig";
+import useTableUserContext from "../hooks/useTableUserContext";
 
 const Servicos = () => {
   // const [users, setUsers] = useState<UserList[]>([]);
@@ -18,7 +17,6 @@ const Servicos = () => {
   const [btnText, setbtnText] = useState<string>("Confirmar")
   const [image, setImage] = useState<File | null>(null);
   const [imageURL, setImageURL] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState<string>("");
   const [refresh, setRefresh] = useState<boolean>(false)
   
   const [serviceData, setServiceData] = useState<Service>({
@@ -32,6 +30,8 @@ const Servicos = () => {
     status: false,
     city: "",
     createdAt: Timestamp.now(),
+    ownerName: "",
+    claimedName: "",
   })
 
   const { user } = useTableUserContext();
@@ -55,6 +55,8 @@ const Servicos = () => {
       tagId: user?.description || "",
       status: false,
       city: user?.city || "",
+      ownerName: user?.name || "",
+      claimedName: "",
     });
   };
 
@@ -66,7 +68,6 @@ const Servicos = () => {
       const fileUrl = URL.createObjectURL(file);
       setImageURL(fileUrl);
     }
-    console.log(serviceData)
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -147,15 +148,36 @@ const Servicos = () => {
                   <div className="w-full h-5 bg-primary-default rounded-t-lg"/>
                   <div className="flex flex-row">
                     <div className="w-full">
-                      <input
-                      className="bg-transparent border-0 w-3/4 text-4xl font-bold focus:border-0 focus:ring-0 text-left"
-                      type="text"
-                      placeholder="Título da requisição"
-                      value={serviceData.title}
-                      onChange={(e) => setServiceData({ ...serviceData, title: e.target.value })}
-                      required
-                      >
-                      </input>
+                      <div className="flex flex-row justify-between">
+                        <input
+                        className="bg-transparent border-0 w-3/4 text-4xl font-bold focus:border-0 focus:ring-0 text-left"
+                        type="text"
+                        placeholder="Título da requisição"
+                        value={serviceData.title}
+                        onChange={(e) => setServiceData({ ...serviceData, title: e.target.value })}
+                        required
+                        >
+                        </input>
+                        <button className="my-auto ml-auto m-5" onClick={toggleCreateModal}>
+                          <svg
+                            className="w-[40px] h-[40px] text-warning-default hover:text-warning-dark dark:text-white my-auto hover:scale-125 transition-all"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M6 18 17.94 6M18 18 6.06 6"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                       <div className="flex flex-row">
                         <p className="ml-4 mt-4 text-xl">Valor proposto:</p>
                         <input
@@ -168,25 +190,6 @@ const Servicos = () => {
                         </input>
                       </div>
                     </div>
-                    <button className="my-auto ml-auto m-5" onClick={toggleCreateModal}>
-                      <svg
-                        className="w-[40px] h-[40px] text-warning-default hover:text-warning-dark dark:text-white my-auto hover:scale-125 transition-all"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M6 18 17.94 6M18 18 6.06 6"
-                        />
-                      </svg>
-                    </button>
                   </div>
                   <hr className="border-primary-default mx-2" />
                   <div className="">
@@ -197,6 +200,7 @@ const Servicos = () => {
                   </div>
                   <textarea
                     className={"bg-transparent border-0 focus:ring-0 focus:border-0 w-11/12 resize-none ml-1 font-semibold"}
+                    required
                     ref={textareaRef}
                     onInput={handleInput}
                     placeholder={"Descrição da requisição..."}
@@ -218,7 +222,6 @@ const Servicos = () => {
                       <p className="text-white font-semibold">{btnText}</p>
                     </button>
                   </div>
-                  {/* stopped here */}
                 </div>
               </div>
             </form>

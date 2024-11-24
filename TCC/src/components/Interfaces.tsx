@@ -58,6 +58,8 @@ export interface Service {
   status: boolean,
   city: string,
   createdAt: Timestamp
+  claimedName: string,
+  ownerName: string,
 }
 
 export interface PriceRange {

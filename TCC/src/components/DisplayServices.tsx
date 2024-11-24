@@ -1,11 +1,22 @@
-import { collection, getDocs, orderBy, query, Timestamp, where } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
-import { db } from "../contexts/firebase/firebaseConfig";
+import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, Timestamp, updateDoc, where } from "firebase/firestore";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
+import { db, storage } from "../contexts/firebase/firebaseConfig";
 import { PriceRange, Service, Tag } from "./Interfaces";
 import { format } from "date-fns";
+import { useParams } from "react-router-dom";
+import useTableUserContext from "../hooks/useTableUserContext";
+import blankimg from "../assets/images/blankimg.jpg";
+import { v4 as uuidv4 } from "uuid";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 interface DisplayServicesProp {
   refresh: boolean,
+}
+
+interface ModalProps {
+  service: Service | null;
+  children?: ReactNode;
+  // onClose: () => void;
 }
 
 const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
@@ -19,6 +30,31 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
   const [searchTagId, setSearchTagId] = useState<string>("");
   const [searchCity, setSearchCity] = useState<string>("");
   const [priceRange, setPriceRange] = useState<PriceRange>({priceMin:"", priceMax:""});
+  const [openModal, setOpenModal] = useState<boolean>(false)
+  const [editMode, setEditMode] = useState<boolean>(false)
+  const [selectedService, setSelectedService] = useState<Service | null>(null)
+  const [image, setImage] = useState<File | null>(null);
+  const [imageURL, setImageURL] = useState<string | null>(null);
+  const [btnText, setbtnText] = useState<string>("Atualizar")
+
+  const [editServiceData, setEditServiceData] = useState<Service>({
+    ownerId: "",
+    claimedId: "",
+    tagId: "",
+    title: "",
+    description: "",
+    image: "",
+    value: "",
+    status: false,
+    city: "",
+    createdAt: Timestamp.now(),
+    ownerName: "",
+    claimedName: "",
+  })
+
+  const { userId } = useParams<{ userId: string }>();
+  const { user } = useTableUserContext();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const cities = [
     "Criciúma",
@@ -51,6 +87,106 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
   const handleChangeCity = (event: React.ChangeEvent<HTMLSelectElement>) => { // Arrumar: função pegando o nome e não o id da Tag.
     setSearchCity(event.target.value);
   };
+  
+  const toggleModal = (service: Service) => {
+    setOpenModal(true)
+    setSelectedService(service)
+    setImageURL(service.image)
+  };
+
+  const toggleModalThroughEdit = (service: Service) => {
+    toggleModal(service)
+    setEditMode(true)
+  };
+  
+  const closeModal = () => {
+    setOpenModal(false)
+    setEditMode(false)
+    setImageURL("")
+    setImage(null)
+    setEditServiceData({
+      ...editServiceData,
+      claimedId: "",
+      title: "",
+      image: "",
+      description: "",
+      value: "",
+      ownerId: user?.uid || "",
+      tagId: user?.description || "",
+      status: false,
+      city: user?.city || "",
+      ownerName: user?.name || "",
+      claimedName: "",
+    });
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      console.log("Imagem escolhida");
+      const file = e.target.files[0];
+      setImage(file);
+      const fileUrl = URL.createObjectURL(file);
+      setImageURL(fileUrl);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setbtnText("Atualizando...")
+
+    try {
+      const collectionRef = doc(db, "services", selectedService?.id);
+      let url = editServiceData.image || "";
+
+      if (image) {
+        const id = uuidv4();
+        const storageRef = ref(storage, `serviceImages/${id}.jpg`);
+        await uploadBytes(storageRef, image);
+        console.log("Upload de imagem realizado com sucesso!");
+        url = await getDownloadURL(storageRef);
+        console.log("url: ", url);
+      }
+
+      const updatedServiceData = {
+        ...editServiceData,
+        image: url,
+        // createdAt: Timestamp.now()
+      };
+
+      await updateDoc(collectionRef, updatedServiceData)
+    } catch(error) {
+      console.error("Erro ao dar upload no serviço: ", error)
+    } finally {
+      closeModal()
+      setbtnText("Atualizar")
+      setRefreshFilter(!refreshFilter)
+    }
+  }
+
+  const handleDelete = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (!selectedService?.id) {
+        return;
+      }
+
+      const collectionRef = doc(db, "services", selectedService?.id);
+      await deleteDoc(collectionRef)
+    } catch(error) {
+      console.error("Erro ao dar upload no serviço: ", error)
+    } finally {
+      closeModal()
+      setbtnText("Atualizar")
+      setRefreshFilter(!refreshFilter)
+    }
+  }
+
+  const handleInput = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto"; // Reset height to calculate the new scrollHeight
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`; // Set height to match content
+    }
+  };
 
   const formatTimestamp = (timestamp: Timestamp): string => {
     const date = timestamp.toDate();
@@ -68,7 +204,6 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
 
       setTags(tagsList)
     }
-
     fetchTags();
   }, []);
 
@@ -125,7 +260,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
         }));
 
         setServices(data)
-        console.log("Data:", data)
+        console.log(services)
         if (querySnapshot.empty) {
           setError("Nenhum serviço encontrado...")
         }
@@ -171,7 +306,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
           <select className="h-13 w-full mb-3 my-auto border-2 bg-transparent border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-primary-default focus:border-primary-default overflow-y-auto hover:shadow-lg transition-all"
           value={searchCity}
           onChange={handleChangeCity}>
-          <option value="" disabled> Selecione uma cidade </option>
+          <option value=""> Selecione uma cidade </option>
           {cities.map((city) => (
             <option key={city} value={city}>
               {city}
@@ -183,7 +318,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
           <select className="h-13 w-full my-auto border-2 mb-3 bg-transparent border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-primary-default focus:border-primary-default overflow-y-auto hover:shadow-lg transition-all"
           value={searchTagId}
           onChange={handleChangeTag}>
-          <option value="" disabled> Selecione uma tag </option>
+          <option value=""> Selecione uma tag </option>
           {tags.map((tag) => (
             <option key={tag.id} value={tag.id}>
               {tag.tagName}
@@ -219,12 +354,38 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
       {isLoading && <p className="font-semibold text-center">Buscando serviços disponíveis...</p>}
       <p className="text-2xl">{error}</p>
       {services.map((service) => (
-      <button className="w-64 h-96 m-5" key={service.image}>
+      <button className="w-64 h-96 m-5" key={service.image} onClick={() => toggleModal(service)}>
         <div className="w-64 h-96 rounded-b-lg shadow-md hover:scale-105 transition-all duration-300 hover:shadow-xl">
           <div className="bg-primary-default rounded-t-lg w-full h-4" />
           <div className="p-2 text-left">
-            <p className="font-semibold text-2xl">{service.title}</p>
-            <hr className="bg-primary-default my-2" />
+            <div className="flex flex-row justify-between">
+              <p className="font-semibold text-2xl">{service.title}</p>
+              {user?.uid == service.ownerId && (
+                <button
+                  className="w-6 h-7 hover:scale-110 transition-all"
+                  onClick={() => toggleModalThroughEdit(service)}>
+                  <svg
+                    className="w-[30px] h-[30px] hover:text-primary-default text-gray-800 dark:text-white"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
+            <hr className="bg-primary-default w-full h-1 my-2" />
+            <a className="font-semibold hover:text-primary-default" href={`/usuario/${selectedService?.ownerId}`}>por: {service.ownerName}</a>
             <div className="flex justify-between">
             <span className="font-bold">R$: {service.value}</span>
             {formatTimestamp(service.createdAt)}
@@ -233,13 +394,128 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
               <p className="whitespace-normal line-clamp-3 break-words overflow-hidden text-ellipsis">{service.description}</p>
             </div>
             {service.image && (
-              <img className="bg-transparent object-cover rounded-lg w-full h-48" src={service.image} alt={service.title}/>
+              <img className="bg-transparent object-cover rounded-lg w-full h-44" src={service.image} alt={service.title}/>
             )}
           </div>
         </div>
       </button>
       ))}
       </div>
+
+      {openModal && ( // Modal
+        <form onSubmit={handleSubmit}>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={closeModal}>
+            <div className="scrollable-container bg-slate-100 w-2/3 h-3/4 m-auto rounded-lg shadow-xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="w-full h-5 bg-primary-default rounded-t-lg"/>
+              <div className="flex flex-row">
+                <div className="w-full">
+                  <div className="flex flex-row justify-between">
+                    {editMode ? (
+                      <input
+                      className="bg-transparent border-0 w-3/4 text-4xl font-bold focus:border-0 focus:ring-0 text-left"
+                      type="text"
+                      placeholder={selectedService?.title}
+                      value={editServiceData.title}
+                      onChange={(e) => setEditServiceData({ ...editServiceData, title: e.target.value })}
+                      >
+                      </input>
+                    ) : (
+                      <p className="bg-transparent ml-3 my-2 border-0 w-3/4 text-4xl font-bold focus:border-0 focus:ring-0 text-left"> {selectedService?.title} </p>
+                    )}
+                    <button className="my-auto ml-auto m-5" onClick={closeModal}>
+                    <svg
+                      className="w-[40px] h-[40px] text-warning-default hover:text-warning-dark dark:text-white my-auto hover:scale-125 transition-all"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18 17.94 6M18 18 6.06 6"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                  <div className="flex flex-row">
+                    <p className="ml-4 mt-4 text-xl">Valor proposto:</p>
+                      {editMode ? (
+                      <input
+                      className="bg-transparent border-0 focus:ring-0 focus:border-0 appearence-none mt-2 w-24 font-semibold text-xl"
+                      type="text"
+                      placeholder={selectedService?.value}
+                      value={editServiceData.value}
+                      onChange={(e) => setEditServiceData({ ...editServiceData, value: e.target.value })}
+                      >
+                      </input>
+                    ) : (
+                      <p className="bg-transparent border-0 focus:ring-0 focus:border-0 appearence-none ml-3 mt-4 mb-2 w-24 font-semibold text-xl">{selectedService?.value}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <hr className="border-primary-default mx-2" />
+              <div className="">
+                <a className="ml-4 mt-3 hover:text-primary-default font-semibold" href={`/usuario/${selectedService?.ownerId}`}>Por: {user?.name}</a>
+                <p className="ml-4">Número: {user?.displayPhone}</p>
+                <p className="ml-4">E-Mail: {user?.displayEmail}</p>
+                <p className="ml-4">Cidade: {user?.city}</p>
+              </div>
+              {editMode ? (
+                <textarea
+                  className={"bg-transparent border-0 focus:ring-0 focus:border-0 w-11/12 resize-none ml-1 font-semibold"}
+                  required
+                  ref={textareaRef}
+                  onInput={handleInput}
+                  placeholder={selectedService?.description}
+                  value={editServiceData.description}
+                  onChange={(e) => setEditServiceData({ ...editServiceData, description: e.target.value })}
+                ></textarea>
+              ) : (
+                <p className={"bg-transparent border-0 mb-12 focus:ring-0 focus:border-0 w-11/12 resize-none ml-4 mt-2 font-semibold"}>{selectedService?.description}</p>
+              )}
+              {editMode ? (
+              <>
+                <img
+                className="rounded-lg w-1/2 m-3 h-1/2 object-cover"
+                  src={imageURL ? imageURL : blankimg}
+                />
+                <input className="ml-3 h-10"
+                type="file"
+                accept="image/*"
+                value={editServiceData.image}
+                onChange={handleImageChange}
+                />
+              </>
+              ) : (
+              <img
+                className="rounded-lg w-1/2 m-3 h-1/2 object-cover"
+                src={selectedService?.image ? selectedService.image : blankimg}
+              />
+              )}
+              <div className="flex flex-row justify-between gap-10">
+                <button className="bg-warning-default hover:bg-warning-dark rounded-lg h-9 w-2/3 ml-10 mt-20 mb-3" type="button" onClick={handleDelete}>
+                  <p className="text-white font-semibold">Deletar serviço</p>
+                </button>
+                {editMode ? (
+                  <button className="bg-primary-default hover:bg-primary-dark rounded-lg h-9 w-2/3 mr-10 mt-20 mb-3" type="submit">
+                    <p className="text-white font-semibold">{btnText}</p>
+                  </button>
+                ) : (
+                  <button className="bg-orange-500 hover:bg-orange-700 rounded-lg h-9 w-2/3 mr-10 mt-20 mb-3" type="button" onClick={() => setEditMode(!editMode)}>
+                    <p className="text-white font-semibold">Editar</p>
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </form>
+        )}
     </div>
   )
 };
