@@ -55,8 +55,10 @@ export interface Service {
   description: string,
   value: string,
   image: string,
-  status: boolean,
+  status: string,
   city: string,
+  displayPhone: string,
+  displayEmail: string,
   createdAt: Timestamp
   claimedName: string,
   ownerName: string,

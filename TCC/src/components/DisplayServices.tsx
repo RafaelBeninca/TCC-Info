@@ -45,7 +45,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
     description: "",
     image: "",
     value: "",
-    status: false,
+    status: "",
     city: "",
     createdAt: Timestamp.now(),
     ownerName: "",
@@ -111,14 +111,19 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
       image: "",
       description: "",
       value: "",
+      displayPhone: "",
+      displayEmail: "",
       ownerId: user?.uid || "",
       tagId: user?.description || "",
-      status: false,
+      status: "",
       city: user?.city || "",
       ownerName: user?.name || "",
       claimedName: "",
     });
   };
+
+  //Filtrar todas as pesquisas dessa página para apenas aquelas não assinada
+  //Testar
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -177,6 +182,36 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
     } finally {
       closeModal()
       setbtnText("Atualizar")
+      setRefreshFilter(!refreshFilter)
+    }
+  }
+
+  const handleClaim = async () => {
+    try {
+      const collectionRef = doc(db, "services", selectedService?.id);
+
+      const updatedServiceData = {
+        tagId: selectedService?.tagId,
+        createdAt: selectedService?.createdAt,
+        city: selectedService?.city,
+        ownerId: selectedService?.ownerId,
+        ownerName: selectedService?.ownerName,
+        displayPhone: selectedService?.displayPhone,
+        displayEmail: selectedService?.displayEmail,
+        image: selectedService?.image,
+        title: selectedService?.title,
+        description: selectedService?.description,
+        value: selectedService?.value,
+        claimedId: user?.uid,
+        claimedName: user?.name,
+        status: "Assinado"
+      };
+
+      await updateDoc(collectionRef, updatedServiceData)
+    } catch(error) {
+      console.error("Erro ao dar claim no serviço: ", error)
+    } finally {
+      closeModal()
       setRefreshFilter(!refreshFilter)
     }
   }
@@ -461,10 +496,10 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
               </div>
               <hr className="border-primary-default mx-2" />
               <div className="">
-                <a className="ml-4 mt-3 hover:text-primary-default font-semibold" href={`/usuario/${selectedService?.ownerId}`}>Por: {user?.name}</a>
-                <p className="ml-4">Número: {user?.displayPhone}</p>
-                <p className="ml-4">E-Mail: {user?.displayEmail}</p>
-                <p className="ml-4">Cidade: {user?.city}</p>
+                <a className="ml-4 mt-3 hover:text-primary-default font-semibold" href={`/usuario/${selectedService?.ownerId}`}>Por: {selectedService?.ownerName}</a>
+                <p className="ml-4">Número: {selectedService?.displayPhone}</p>
+                <p className="ml-4">E-Mail: {selectedService?.displayEmail}</p>
+                <p className="ml-4">Cidade: {selectedService?.city}</p>
               </div>
               {editMode ? (
                 <textarea
@@ -498,6 +533,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
                 src={selectedService?.image ? selectedService.image : blankimg}
               />
               )}
+              {selectedService?.ownerId == user?.uid && (
               <div className="flex flex-row justify-between gap-10">
                 <button className="bg-warning-default hover:bg-warning-dark rounded-lg h-9 w-2/3 ml-10 mt-20 mb-3" type="button" onClick={handleDelete}>
                   <p className="text-white font-semibold">Deletar serviço</p>
@@ -512,6 +548,14 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
                   </button>
                 )}
               </div>
+              )}
+              {selectedService?.ownerId !== user?.uid && (
+                <div className="flex align-middle justify-center w-full">
+                  <button className="bg-orange-500 hover:bg-orange-700 rounded-lg h-9 w-2/3 mr-10 mt-20 mb-3" type="button" onClick={handleClaim}>
+                    <p className="text-white font-semibold">Assinar Serviço</p>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </form>

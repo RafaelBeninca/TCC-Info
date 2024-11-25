@@ -25,6 +25,7 @@ const TagModal: React.FC<TagModalProps> = ({ tags, refresh, setRefresh }) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setTagUser({ ...tagUser, tagId: e.target.value });
+    console.log(tagUser)
   };
 
   const closeError = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -41,12 +42,11 @@ const TagModal: React.FC<TagModalProps> = ({ tags, refresh, setRefresh }) => {
     e.preventDefault();
     try {
       if (!tagUser.tagId || !user) return;
-      console.log(tagUser.tagId);
       const docRef = collection(db, "joinTagsUser");
       const idUserQuery = query(docRef, where("userId", "==", user.uid));
       const queryUserSnapshot = await getDocs(idUserQuery);
 
-      const idTagQuery = query(docRef, where("tagId", "==", tagUser.tagId));
+      const idTagQuery = query(docRef, where("tagId", "==", tagUser.tagId), where("userId", "==", user.uid));
       const queryTagSnapshot = await getDocs(idTagQuery);
       console.log(queryTagSnapshot);
 
@@ -86,7 +86,7 @@ const TagModal: React.FC<TagModalProps> = ({ tags, refresh, setRefresh }) => {
 
       const idTagQuery = query(docRef, 
         where("tagId", "==", tagUser.tagId), 
-        where("userId", "==", tagUser.userId));
+        where("userId", "==", user.uid));
       const queryTagSnapshot = await getDocs(idTagQuery);
 
       if (queryTagSnapshot.empty) {
