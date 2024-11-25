@@ -50,7 +50,7 @@ export interface SearchUser {
 export interface Service {
   ownerId: string,
   claimedId: string,
-  tagId: string,
+  tag: string,
   title: string,
   description: string,
   value: string,

@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, Timestamp, updateDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, orderBy, query, Timestamp, updateDoc, where } from "firebase/firestore";
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { db, storage } from "../contexts/firebase/firebaseConfig";
 import { PriceRange, Service, Tag } from "./Interfaces";
@@ -27,7 +27,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
   const [refreshFilter, setRefreshFilter] = useState<boolean>(false);
   const [tags, setTags] = useState<Tag[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchTagId, setSearchTagId] = useState<string>("");
+  const [searchTag, setSearchTag] = useState<string>("");
   const [searchCity, setSearchCity] = useState<string>("");
   const [priceRange, setPriceRange] = useState<PriceRange>({priceMin:"", priceMax:""});
   const [openModal, setOpenModal] = useState<boolean>(false)
@@ -40,11 +40,13 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
   const [editServiceData, setEditServiceData] = useState<Service>({
     ownerId: "",
     claimedId: "",
-    tagId: "",
+    tag: "",
     title: "",
     description: "",
     image: "",
     value: "",
+    displayEmail: "",
+    displayPhone: "",
     status: "",
     city: "",
     createdAt: Timestamp.now(),
@@ -80,11 +82,11 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
     setOrder(!order)
   }
 
-  const handleChangeTag = (event: React.ChangeEvent<HTMLSelectElement>) => { // Arrumar: função pegando o nome e não o id da Tag.
-    setSearchTagId(event.target.value);
+  const handleChangeTag = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSearchTag(event.target.value);
   };
 
-  const handleChangeCity = (event: React.ChangeEvent<HTMLSelectElement>) => { // Arrumar: função pegando o nome e não o id da Tag.
+  const handleChangeCity = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSearchCity(event.target.value);
   };
   
@@ -114,7 +116,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
       displayPhone: "",
       displayEmail: "",
       ownerId: user?.uid || "",
-      tagId: user?.description || "",
+      tag: user?.description || "",
       status: "",
       city: user?.city || "",
       ownerName: user?.name || "",
@@ -191,7 +193,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
       const collectionRef = doc(db, "services", selectedService?.id);
 
       const updatedServiceData = {
-        tagId: selectedService?.tagId,
+        tag: selectedService?.tag,
         createdAt: selectedService?.createdAt,
         city: selectedService?.city,
         ownerId: selectedService?.ownerId,
@@ -247,7 +249,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
       setError(null)
       try {
         const productCollection = collection(db, "services");
-        let q = query(productCollection);
+        let q = query(productCollection, where("status", "==", ""))
 
         if (order) { // Ordem decrescente / crescente // arrumar erro aqui
           q = query(
@@ -269,8 +271,8 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
           );
         }
 
-        if (searchTagId) { //Filtro de Tag ID
-          q = query(q, where("tagId", "==", searchTagId))
+        if (searchTag) { //Filtro de Tag ID
+          q = query(q, where("tag", "==", searchTag))
         }
 
         if (searchCity) { //Filtro de Cidade
@@ -351,16 +353,15 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
 
           <p className="font-semibold text-primary-default">Filtro de Tags:</p>
           <select className="h-13 w-full my-auto border-2 mb-3 bg-transparent border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-primary-default focus:border-primary-default overflow-y-auto hover:shadow-lg transition-all"
-          value={searchTagId}
+          value={searchTag}
           onChange={handleChangeTag}>
           <option value=""> Selecione uma tag </option>
           {tags.map((tag) => (
-            <option key={tag.id} value={tag.id}>
+            <option key={tag.tagName} value={tag.tagName}>
               {tag.tagName}
             </option>
           ))}
           </select>
-
 
           <p className="font-semibold text-primary-default">Filtro de Valor:</p>
           <div className="flex flex-row">
@@ -420,7 +421,12 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
               )}
             </div>
             <hr className="bg-primary-default w-full h-1 my-2" />
-            <a className="font-semibold hover:text-primary-default" href={`/usuario/${selectedService?.ownerId}`}>por: {service.ownerName}</a>
+            <div className="flex flex-row justify-between">
+              <a className="font-semibold hover:text-primary-default" href={`/usuario/${selectedService?.ownerId}`}>por: {service.ownerName}</a>
+              <div className="w-auto h-7 px-2 bg-slate-100 border-primary-default border-2 gap-2 rounded-full">
+                <span className="text-primary-dark font-semibold">{service.tag}</span>
+              </div>
+            </div>
             <div className="flex justify-between">
             <span className="font-bold">R$: {service.value}</span>
             {formatTimestamp(service.createdAt)}

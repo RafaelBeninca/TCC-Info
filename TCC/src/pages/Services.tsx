@@ -1,13 +1,13 @@
-import { addDoc, collection, Timestamp } from "firebase/firestore";
+import { addDoc, collection, getDocs, Timestamp } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import "flowbite";
 import { Flowbite } from "flowbite-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import blankimg from "../assets/images/blankimg.jpg";
 import DisplayServices from "../components/displayServices";
-import { Service } from "../components/Interfaces";
+import { Service, Tag } from "../components/Interfaces";
 import { db, storage } from "../contexts/firebase/firebaseConfig";
 import useTableUserContext from "../hooks/useTableUserContext";
 
@@ -18,11 +18,20 @@ const Servicos = () => {
   const [image, setImage] = useState<File | null>(null);
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [refresh, setRefresh] = useState<boolean>(false)
+  const [tags, setTags] = useState<Tag[]>([]);
+
+  const handleChangeTag = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setServiceData({
+      ...serviceData,
+      tag: event.target.value,
+    });
+    console.log(serviceData)
+  };
   
   const [serviceData, setServiceData] = useState<Service>({
     ownerId: "",
     claimedId: "",
-    tagId: "",
+    tag: "",
     title: "",
     description: "",
     displayEmail: "",
@@ -56,7 +65,7 @@ const Servicos = () => {
       displayPhone: user?.displayPhone || "",
       displayEmail: user?.displayEmail || "",
       ownerId: user?.uid || "",
-      tagId: user?.description || "",
+      tag: "",
       status: "",
       city: user?.city || "",
       ownerName: user?.name || "",
@@ -73,6 +82,20 @@ const Servicos = () => {
       setImageURL(fileUrl);
     }
   };
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      const tagsCollection = collection(db, "tags");
+      const snapshot = await getDocs(tagsCollection);
+      const tagsList: Tag[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Tag)
+      }));
+
+      setTags(tagsList)
+    }
+    fetchTags();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -197,10 +220,21 @@ const Servicos = () => {
                   </div>
                   <hr className="border-primary-default mx-2" />
                   <div className="">
-                    <p className="ml-4 mt-2">Por: {user?.name}</p>
+                    <p className="ml-4 mt-2 font-semibold">Por: {user?.name}</p>
                     <p className="ml-4">Número: {user?.displayPhone}</p>
                     <p className="ml-4">E-Mail: {user?.displayEmail}</p>
                     <p className="ml-4">Cidade: {user?.city}</p>
+                    <p className="ml-4 mt-2">Tag do serviço:</p>
+                    <select className="h-13 w-1/5 ml-4 my-auto border-2 mb-3 bg-transparent border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-primary-default focus:border-primary-default overflow-y-auto hover:shadow-lg transition-all"
+                    value={serviceData.tag}
+                    onChange={handleChangeTag}>
+                    <option value=""> Selecione uma tag </option>
+                    {tags.map((tag) => (
+                      <option key={tag.tagName} value={tag.tagName}>
+                        {tag.tagName}
+                      </option>
+                    ))}
+                    </select>
                   </div>
                   <textarea
                     className={"bg-transparent border-0 focus:ring-0 focus:border-0 w-11/12 resize-none ml-1 font-semibold"}
