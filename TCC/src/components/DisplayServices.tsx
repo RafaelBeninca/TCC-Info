@@ -86,6 +86,23 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
     setSearchTag(event.target.value);
   };
 
+  // const handleEditTag = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  //   setSelectedService({
+  //     ...selectedService,
+  //     tag: (event.target.value),
+  //   });
+  // };
+
+  const handleEditTag = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedTag = e.target.value;
+  
+    // Update the selectedService state with the new tag
+    setEditServiceData((prev) =>
+      prev ? { ...prev, tag: selectedTag } : prev
+    );
+    console.log(editServiceData)
+  };
+
   const handleChangeCity = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSearchCity(event.target.value);
   };
@@ -116,16 +133,13 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
       displayPhone: "",
       displayEmail: "",
       ownerId: user?.uid || "",
-      tag: user?.description || "",
+      tag: "",
       status: "",
       city: user?.city || "",
       ownerName: user?.name || "",
       claimedName: "",
     });
   };
-
-  //Filtrar todas as pesquisas dessa página para apenas aquelas não assinada
-  //Testar
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -159,6 +173,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
         image: url,
         // createdAt: Timestamp.now()
       };
+      console.log(updatedServiceData)
 
       await updateDoc(collectionRef, updatedServiceData)
     } catch(error) {
@@ -251,7 +266,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
         const productCollection = collection(db, "services");
         let q = query(productCollection, where("status", "==", ""))
 
-        if (order) { // Ordem decrescente / crescente // arrumar erro aqui
+        if (order) { // Ordem decrescente / crescente
           q = query(
             q,
             orderBy("createdAt", "desc")
@@ -507,9 +522,27 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
                 <p className="ml-4">E-Mail: {selectedService?.displayEmail}</p>
                 <p className="ml-4">Cidade: {selectedService?.city}</p>
               </div>
+              <div className="flex flex-wrap flex-row min-w-0 w-1/2 mt-2 ml-4 h-7 gap-2">
+                {editMode ? (
+                  <select className="h-13 w-3/5 my-auto border-2 bg-transparent border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-primary-default focus:border-primary-default overflow-y-auto hover:shadow-lg transition-all"
+                    value={editServiceData?.tag}
+                    onChange={handleEditTag}>
+                    <option value=""> Selecione uma tag </option>
+                    {tags.map((tag) => (  
+                      <option key={tag.tagName} value={tag.tagName}>
+                        {tag.tagName}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="w-auto h-7 px-2 bg-slate-100 border-primary-default border-2 gap-2 rounded-full">
+                    <span className="text-primary-dark font-semibold">{selectedService?.tag}</span>
+                  </div>
+                )}
+              </div>
               {editMode ? (
                 <textarea
-                  className={"bg-transparent border-0 focus:ring-0 focus:border-0 w-11/12 resize-none ml-1 font-semibold"}
+                  className={"bg-transparent border-0 mt-4 focus:ring-0 focus:border-0 w-11/12 resize-none ml-1 font-semibold"}
                   required
                   ref={textareaRef}
                   onInput={handleInput}
@@ -518,7 +551,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({refresh}) => {
                   onChange={(e) => setEditServiceData({ ...editServiceData, description: e.target.value })}
                 ></textarea>
               ) : (
-                <p className={"bg-transparent border-0 mb-12 focus:ring-0 focus:border-0 w-11/12 resize-none ml-4 mt-2 font-semibold"}>{selectedService?.description}</p>
+                <p className={"bg-transparent border-0 mb-12 focus:ring-0 focus:border-0 w-11/12 resize-none ml-4 mt-6 font-semibold"}>{selectedService?.description}</p>
               )}
               {editMode ? (
               <>
