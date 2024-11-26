@@ -33,7 +33,11 @@ const SelectCity: React.FC = () => {
         const userDoc = await getDoc(docRef);
         if (userDoc.exists()) {
           const selection = userDoc.data().city;
-          setSelectedCity(selection);
+          if (!selection) {
+            setSelectedCity("Selecione sua cidade")
+          } else {
+            setSelectedCity(selection);
+          }
         }
       } catch (error) {
         console.error("Erro ao encontrar o usuário da página: ", error);
@@ -43,11 +47,12 @@ const SelectCity: React.FC = () => {
   }, [userId]);
 
   const toggleEditable = async () => {
-    if (editable) {
+    console.log(selectedCity)
+    if (editable && selectedCity !== "Selecione sua cidade") {
       try {
         const userRef = doc(db, "user", user?.uid);
         await updateDoc(userRef, { city: selectedCity });
-        alert("E-mail de display salvo com sucesso!");
+        alert("Cidade salva com sucesso!");
         setSelectedCity(selectedCity);
       } catch (error) {
         console.error("Erro ao atualizar descrição: ", error);
@@ -62,14 +67,14 @@ const SelectCity: React.FC = () => {
 
   return (
     <div className="flex flex-row text-lg gap-4 mt-5">
-      <p className="my-auto font-semibold text-xl">Município:</p>
+      <p className="my-auto font-semibold text-xl">Cidade:</p>
       {userId == user?.uid && editable ? (
         <select
           className="h-10 w-60 my-auto border-2 bg-transparent border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-primary-default focus:border-primary-default overflow-y-auto hover:shadow-lg transition-all"
           value={selectedCity}
           onChange={handleSelectChange}
         >
-          <option disabled>Selecione seu município</option>
+          <option disabled>Selecione sua cidade</option>
           {cities.map((city) => (
             <option key={city} value={city}>
               {city}

@@ -9,7 +9,7 @@ import { FirebaseAuthContext } from "../contexts/AuthenticationProvider/Firebase
 import { doSignInWithEmailAndPassword } from "../contexts/authContext/auth";
 
 const Register = () => {
-  const [toggleError, setToggleError] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
   const [user, setUser] = useState<FormUser>({
     name: "",
@@ -31,7 +31,6 @@ const Register = () => {
   const navigate = useNavigate();
 
   const signUp = async (e: FormEvent) => {
-    setToggleError(false)
     e.preventDefault();
     if (!isSigningIn) {
       setIsSigningIn(true);
@@ -45,22 +44,37 @@ const Register = () => {
           user.email,
           user.password
         );
-        dispatch({
-          type: "LOGIN",
-          payload: {
-            ...userCredential.user,
-            email: userCredential.user.email as string,
-          },
-        });
+        if (!isSigningIn) {
+          console.log("hi")
+          dispatch({
+            type: "LOGIN",
+            payload: {
+              ...userCredential.user,
+              email: userCredential.user.email as string,
+            },
+          });
+        }
         await setDoc(doc(db, "user", res.user.uid), {
           ...user,
           Timestamp: serverTimestamp(),
         });
         navigate("/");
-      } catch (error) {
-        console.log("Erro ao Registrar usuário: " + error);
-        setToggleError(true);
+      } catch (err: any) {
+        console.log("Erro ao Registrar usuário: " + err);
         setIsSigningIn(false)
+        switch (err.code) {
+          case "auth/email-already-in-use":
+            setError("Este e-mail já está em uso.");
+            break;
+          case "auth/weak-password":
+            setError("Senha precisa ser no mínimo 6 dígitos.");
+            break;
+          case "auth/invalid-email":
+            setError("Por favor use um e-mail válido.");
+            break;
+          default:
+            setError("Ocorreu um acidente, por favor, tente novamente.");
+        }
       }
     }
   };
@@ -112,7 +126,7 @@ const Register = () => {
             >
               Já possui uma senha? Entrar
             </a>
-            {toggleError && <ErrorMsg />}
+            {error && <ErrorMsg message={error}/>}
             <br />
           </div>
           <div className="flex items-start mb-5">

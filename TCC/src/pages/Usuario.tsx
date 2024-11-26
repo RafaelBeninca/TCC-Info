@@ -25,6 +25,7 @@ import { auth, db, storage } from "../contexts/firebase/firebaseConfig";
 import useTableUserContext from "../hooks/useTableUserContext";
 import SecondaryInfo from "../components/SecondaryInfo";
 import SelectCity from "../components/SelectCity";
+import DisplayUserServices from "../components/DisplayUserServices";
 
 const Usuario: React.FC = () => {
   const [isVerified, setIsVerified] = useState<boolean>(false);
@@ -250,6 +251,7 @@ const Usuario: React.FC = () => {
         </div>
       </div>
       <SecondaryInfo/>
+      <DisplayUserServices/>
       {openModal && ( // Modal
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={toggleModal}>
           <div className="bg-slate-100 w-1/2 m-auto rounded-lg shadow-xl" onClick={(e) => e.stopPropagation()}>

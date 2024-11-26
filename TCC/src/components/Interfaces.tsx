@@ -62,6 +62,7 @@ export interface Service {
   createdAt: Timestamp
   claimedName: string,
   ownerName: string,
+  potentialProviderArray: [],
 }
 
 export interface PriceRange {

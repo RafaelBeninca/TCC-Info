@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { db } from "../contexts/firebase/firebaseConfig";
 import useTableUserContext from "../hooks/useTableUserContext";
 import { SecDisplayInfo } from "./Interfaces";
+import { formatPhone } from "../utils/helpers";
 
 
 const SecondaryInfo = () => {
@@ -56,6 +57,14 @@ const SecondaryInfo = () => {
     setEmailEditable(!emailEditable)
   }
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    setDisplayData({
+      ...displayData,
+      displayPhone: formatPhone(inputValue),
+    });
+  };
+
   const toggleEditablePhone = async () => {
     if (phoneEditable) {
       try {
@@ -67,7 +76,7 @@ const SecondaryInfo = () => {
           displayEmail: displayData.displayEmail,
         });
         setRefresh(!refresh)
-        alert("E-mail de display salvo com sucesso!")
+        alert("Número salvo com sucesso!")
       } catch (error) {
         console.error("Erro ao atualizar descrição: ", error);
       }
@@ -90,10 +99,12 @@ const SecondaryInfo = () => {
             <input
             type="text"
             className="block border-2 h-7 hover:border-primary-default hover:shadow-lg focus:border-primary-dark transition-all pl-2 text-sm text-gray-900 dark:text-white py-2"
+            maxLength={17}
             style={{ width: "70%" }}
-            placeholder="Digite seu novo nome"
+            placeholder="Digite seu novo número de contato"
             value={displayData.displayPhone}
-            onChange={(e) => setDisplayData({ ...displayData, displayPhone: e.target.value })}
+            // onChange={(e) => setDisplayData({ ...displayData, displayPhone: e.target.value })}
+            onChange={handlePhoneChange}
           ></input>
           )}
           {userId == user?.uid && (
@@ -141,7 +152,7 @@ const SecondaryInfo = () => {
             type="text"
             className="block border-2 h-7 hover:border-primary-default hover:shadow-lg focus:border-primary-dark transition-all pl-2 text-sm text-gray-900 py-2"
             style={{ width: "70%" }}
-            placeholder="Digite seu novo nome"
+            placeholder="Digite seu novo e-mail de display"
             value={displayData.displayEmail}
             onChange={(e) => setDisplayData({ ...displayData, displayEmail: e.target.value })}
           ></input>

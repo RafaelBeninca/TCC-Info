@@ -71,6 +71,7 @@ const DeleteAccountBtn: React.FC = () => {
         show={openModal}
         size="sm"
         onClose={() => setOpenModal(false)}
+        className="relative scrollable-container bg-slate-100 w-2/3 h-3/4 m-auto rounded-lg shadow-xl overflow-y-auto"
         popup
       >
         <Modal.Header />

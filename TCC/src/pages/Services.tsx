@@ -43,6 +43,7 @@ const Servicos = () => {
     createdAt: Timestamp.now(),
     ownerName: "",
     claimedName: "",
+    potentialProviderArray: [],
   })
 
   const { user } = useTableUserContext();
@@ -70,6 +71,7 @@ const Servicos = () => {
       city: user?.city || "",
       ownerName: user?.name || "",
       claimedName: "",
+      potentialProviderArray: [],
     });
   };
 
