@@ -291,7 +291,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
       setError(null);
       try {
         const productCollection = collection(db, "services");
-        let q = query(productCollection, where("status", "!=", "Concluido"));
+        let q = query(productCollection, where("status", "!=", "Prestado"));
 
         if (order) {
           // Ordem decrescente / crescente
@@ -547,6 +547,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
                       <input
                         className="bg-transparent border-0 w-3/4 text-4xl font-bold focus:border-0 focus:ring-0 text-left"
                         type="text"
+                        required
                         maxLength={30}
                         placeholder={selectedService?.title}
                         value={editServiceData.title}
@@ -591,12 +592,14 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
                     {editMode ? (
                       <DecimalInput
                       type="text"
+                      required
                       placeholder="0,00"
                       className="bg-transparent border-0 focus:ring-0 focus:border-0 appearence-none mt-2 w-24 font-semibold text-xl"
-                      value={priceRange.priceMax}
+                      value={editServiceData?.value}
                       onChange={(e) =>
-                        handleInputChange<PriceRange>(e, setPriceRange, "priceMax")
-                      }/>
+                        handleInputChange<Service>(e, setEditServiceData, "value")
+                      }
+                      />
                     ) : (
                       <p className="bg-transparent border-0 focus:ring-0 focus:border-0 appearence-none ml-3 mt-4 mb-2 w-24 font-semibold text-xl">
                         {selectedService?.value}
@@ -617,11 +620,12 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
                 <p className="ml-4">E-Mail: {selectedService?.displayEmail}</p>
                 <p className="ml-4">Cidade: {selectedService?.city}</p>
               </div>
-              <div className="flex flex-wrap flex-row min-w-0 w-1/2 mt-2 ml-4 h-7 gap-2">
+              <div className="flex flex-wrap flex-col mb-8 min-w-0 w-1/2 mt-2 ml-4 h-7 gap-2">
                 {editMode ? (
                   <select
                     className="h-13 w-3/5 my-auto border-2 bg-transparent border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-primary-default focus:border-primary-default overflow-y-auto hover:shadow-lg transition-all"
                     value={editServiceData?.tag}
+                    required
                     onChange={handleEditTag}
                   >
                     <option value=""> Selecione uma tag </option>
@@ -632,7 +636,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
                     ))}
                   </select>
                 ) : (
-                  <div className="w-auto h-7 px-2 bg-slate-100 border-primary-default border-2 gap-2 rounded-full">
+                  <div className="w-fit h-7 px-2 bg-slate-100 border-primary-default border-2 gap-2 rounded-full">
                     <span className="text-primary-dark font-semibold">
                       {selectedService?.tag}
                     </span>
@@ -642,7 +646,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
               {editMode ? (
                 <textarea
                   className={
-                    "bg-transparent border-0 mt-4 focus:ring-0 focus:border-0 w-11/12 resize-none ml-1 font-semibold"
+                    "bg-transparent border-0 focus:ring-0 focus:border-0 w-11/12 resize-none ml-1 font-semibold"
                   }
                   required
                   maxLength={2000}

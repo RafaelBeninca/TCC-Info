@@ -31,7 +31,7 @@ const DisplayUserServices = () => {
       try {
         const productCollection = collection(db, "services");
         const q = query(productCollection,
-          where("status", "!=", "Concluido"),
+          where("status", "==", ""),
           where("ownerId", "==", userId)
         );
 

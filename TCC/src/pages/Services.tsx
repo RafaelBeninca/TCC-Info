@@ -10,11 +10,15 @@ import DisplayServices from "../components/displayServices";
 import { Service, Tag } from "../components/Interfaces";
 import { db, storage } from "../contexts/firebase/firebaseConfig";
 import useTableUserContext from "../hooks/useTableUserContext";
+import DecimalInput from "../components/DecimalInput";
+import { handleInputChange } from "../utils/helpers";
+import ErrorMsg from "../components/ErrorMsg";
 
 const Servicos = () => {
   // const [users, setUsers] = useState<UserList[]>([]);
   const [openCreateModal, setOpenCreateModal] = useState<boolean>(false);
   const [btnText, setbtnText] = useState<string>("Confirmar")
+  const [error, setError] = useState<string>("")
   const [image, setImage] = useState<File | null>(null);
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [refresh, setRefresh] = useState<boolean>(false)
@@ -53,6 +57,9 @@ const Servicos = () => {
   const toggleCreateModal = () => {
     if (!user) {
       navigate("/login")
+    } else if (!user.city || !user.displayEmail) {
+      setError("Para requisitar um serviço, você precisa de um e-mail de display e definir a sua cidade.")
+      return;
     }
     setOpenCreateModal(!openCreateModal);
     setImageURL("")
@@ -167,7 +174,7 @@ const Servicos = () => {
                 </svg>
                 <p className="font-bold text-white text-xl text-center my-auto">Requisitar serviço</p>
               </button>
-              <hr className="bg-primary-default w-1 my-auto h-14"/>
+              <span className="my-auto"><ErrorMsg message={error}/></span>
             </div>
             <DisplayServices refresh={refresh}/>
             {openCreateModal && ( // Modal
@@ -180,6 +187,7 @@ const Servicos = () => {
                       <div className="flex flex-row justify-between">
                         <input
                         className="bg-transparent border-0 w-3/4 text-4xl font-bold focus:border-0 focus:ring-0 text-left"
+                        maxLength={40}
                         type="text"
                         placeholder="Título da requisição"
                         value={serviceData.title}
@@ -209,14 +217,15 @@ const Servicos = () => {
                       </div>
                       <div className="flex flex-row">
                         <p className="ml-4 mt-4 text-xl">Valor proposto:</p>
-                        <input
-                        className="bg-transparent border-0 focus:ring-0 focus:border-0 appearence-none ml-4 mt-2 w-24 font-semibold text-xl"
-                        type="text"
-                        placeholder="99.99"
-                        value={serviceData.value}
-                        onChange={(e) => setServiceData({ ...serviceData, value: e.target.value })}
-                        >
-                        </input>
+                        <DecimalInput
+                          type="text"
+                          placeholder="00.00"
+                          className="bg-transparent border-0 focus:ring-0 focus:border-0 appearence-none ml-4 mt-2 w-24 font-semibold text-xl"
+                          value={serviceData.value}
+                          onChange={(e) =>
+                            handleInputChange<Service>(e, setServiceData, "value")
+                          }
+                        />
                       </div>
                     </div>
                   </div>
@@ -241,6 +250,7 @@ const Servicos = () => {
                   <textarea
                     className={"bg-transparent border-0 focus:ring-0 focus:border-0 w-11/12 resize-none ml-1 font-semibold"}
                     required
+                    maxLength={2000}
                     ref={textareaRef}
                     onInput={handleInput}
                     placeholder={"Descrição da requisição..."}

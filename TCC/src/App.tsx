@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Servicos from "./pages/Services";
 import Usuario from "./pages/Usuario";
+import ManagePotentialProviders from "./pages/ManagePotentialProviders";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
               <Route path="register" element={<Register />} />
               <Route path="usuario/:userId" element={<Usuario />} />
               <Route path="servicos" element={<Servicos />} />
+              <Route path="servicos-provedores/:serviceId" element={<ManagePotentialProviders />} />
             </Route>
             <Route path="*" element={<Error />} />
           </Routes>

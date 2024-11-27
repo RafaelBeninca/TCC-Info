@@ -3,8 +3,8 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
-// import { setLogLevel } from "firebase/firestore";
-// setLogLevel("debug")
+import { setLogLevel } from "firebase/firestore";
+setLogLevel("debug")
 
 const firebaseConfig = {
   databaseURL: "https://tccinfo-82f7e-default-rtdb.firebaseio.com",//import.meta.env.VITE_FIREBASE_DATABASE_URL,
