@@ -32,20 +32,25 @@ const Register = () => {
 
   const signUp = async (e: FormEvent) => {
     e.preventDefault();
+
     if (!isSigningIn) {
       setIsSigningIn(true);
+
       try {
         const res = await createUserWithEmailAndPassword(
           auth,
           user.email,
           user.password
         );
+
         const userCredential = await doSignInWithEmailAndPassword(
           user.email,
           user.password
         );
+
         if (!isSigningIn) {
-          console.log("hi")
+          console.log("Usuário logado", userCredential.user)
+
           dispatch({
             type: "LOGIN",
             payload: {
@@ -53,12 +58,14 @@ const Register = () => {
               email: userCredential.user.email as string,
             },
           });
+          
+          await setDoc(doc(db, "user", res.user.uid), {
+            ...user,
+            Timestamp: serverTimestamp(),
+          });
+          
+          navigate("/");
         }
-        await setDoc(doc(db, "user", res.user.uid), {
-          ...user,
-          Timestamp: serverTimestamp(),
-        });
-        navigate("/");
       } catch (err: any) {
         console.log("Erro ao Registrar usuário: " + err);
         setIsSigningIn(false)

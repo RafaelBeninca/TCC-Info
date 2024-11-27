@@ -29,6 +29,7 @@ export default {
   },
   plugins: [
     require("flowbite/plugin"),
+    require("tailwindcss-textshadow")
     // require('@tailwindcss/line-clamp')
   ]
 };

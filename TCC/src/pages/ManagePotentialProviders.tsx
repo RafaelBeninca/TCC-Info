@@ -4,6 +4,8 @@ import { useParams } from "react-router-dom";
 import { db } from "../contexts/firebase/firebaseConfig";
 import { Service } from "../components/Interfaces";
 import blankpfp from "../assets/images/blankpfp.jpg";
+import emailjs from "emailjs-com";
+import useTableUserContext from "../hooks/useTableUserContext";
 
 interface User {
   id: string,
@@ -11,6 +13,7 @@ interface User {
   profilePicture: string,
   description: string,
   city: string,
+  displayEmail: string,
 }
 
 
@@ -21,6 +24,7 @@ const ManagePotentialProviders: React.FC = () => {
   const [refresh, setRefresh] = useState<boolean>(false);
   const { serviceId } = useParams<{ serviceId: string }>();
   console.log(serviceId)
+  const { user } = useTableUserContext();
 
   useEffect(() => {
     const fetchService = async () => {
@@ -41,7 +45,7 @@ const ManagePotentialProviders: React.FC = () => {
     };
 
     fetchService();
-  }, [serviceId,]);
+  }, [serviceId]);
 
   useEffect(() => {
     const fetchService = async () => {
@@ -52,7 +56,7 @@ const ManagePotentialProviders: React.FC = () => {
           const data = serviceDoc.data();
           if (data.potentialProviderArray && Array.isArray(data.potentialProviderArray)) {
             setUserIds(data.potentialProviderArray);
-            console.log(data)
+            console.log(data);
           } else {
             console.error("No valid 'userIds' array found in service document.");
           }
@@ -65,7 +69,7 @@ const ManagePotentialProviders: React.FC = () => {
     };
 
     fetchService();
-  }, [serviceId]);
+  }, [serviceId, refresh]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -91,14 +95,29 @@ const ManagePotentialProviders: React.FC = () => {
     };
 
     fetchUsers();
-  }, [userIds, refresh]);
+  }, [userIds]);
   
 
-  const handleAccept = async (userId: string) => {
+  const handleAccept = async (userId: string, userName: string, userEmail: string) => {
     if (!userId) return;
     const docRef = doc(db, "services", serviceId);
 
     try {
+      const formData = {
+        sender: user?.name,
+        to_name: userName,
+        to_email: userEmail,
+        from_name: "Workspace Team",
+      };
+
+      const result = await emailjs.send(
+        "service_3tertpg",
+        "template_t4wxzx8",
+        formData,
+        "ZgMc7h4TBYyli2pMM"
+      );
+      console.log(result.text)
+
       await setDoc(docRef, {
         status: "Prestado",
         claimedId: userId,
@@ -129,25 +148,26 @@ const ManagePotentialProviders: React.FC = () => {
       <div className="m-5">
         <h1 className="text-5xl">Manuseamento das requisições no serviço:</h1>
         <h1 className="text-5xl text-primary-default">"{pageService?.title}"</h1>
+        <hr className="h-0.5 mt-5 mb-10 w-auto bg-primary-default" />
       </div>
       <div className="bg-gray-200 mx-5 p-x-5 h-full rounded-xl">
-        <ul className="flex flex-col gap-5 w-full h-1/2 p-3">
-          {users.map(user => (
-            <li className="bg-gray-100 flex flex-row w-full h-16 rounded-full shadow-lg" key={user.id}>
+        <ul className="flex flex-col gap-5 w-full h-full p-3 overflow-hidden overflow-y-auto">
+          {users.map(servUser => (
+            <li className="bg-gray-100 flex flex-row w-full h-16 rounded-full shadow-lg" key={servUser.id}>
               <img
                 className="w-12 h-12 rounded-full object-cover my-auto ml-3"
-                src={user.profilePicture ? user.profilePicture : blankpfp}
+                src={servUser.profilePicture ? servUser.profilePicture : blankpfp}
                 alt="Profile"
               />
               <div className="my-auto ml-5 w-full">
-                <a className="text-2xl font-bold hover:text-primary-default" href={`/usuario/${user.id}`}>{user.name}</a>
-                <p className="">{user.city}</p>
+                <a className="text-2xl font-bold hover:text-primary-default" href={`/usuario/${servUser.id}`}>{servUser.name}</a>
+                <p className="">{servUser.city}</p>
               </div>
               <div className="flex flex-row my-auto gap-5 mr-5">
-                <button className="bg-primary-default text-white font-semibold w-32 h-7 rounded-full shadow-lg hover:bg-primary-dark hover:scale-105 transition-all duration-300" onClick={() => handleAccept(user.id)}>
+                <button className="bg-primary-default text-white font-semibold w-32 h-7 rounded-full shadow-lg hover:bg-primary-dark hover:scale-105 transition-all duration-300" onClick={() => handleAccept(servUser.id, servUser.name, servUser.displayEmail)}>
                   Aceitar
                 </button>
-                <button className="bg-warning-default text-white font-semibold w-32 h-7 rounded-full shadow-lg hover:bg-warning-dark hover:scale-105 transition-all duration-300" onClick={() => handleDeny(user.id)}>
+                <button className="bg-warning-default text-white font-semibold w-32 h-7 rounded-full shadow-lg hover:bg-warning-dark hover:scale-105 transition-all duration-300" onClick={() => handleDeny(servUser.id)}>
                   Recusar
                 </button>
               </div>

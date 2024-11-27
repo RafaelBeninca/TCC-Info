@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import emailjs from 'emailjs-com';
+import emailjs from "emailjs-com";
 import {
   arrayUnion,
   collection,
@@ -22,6 +22,7 @@ import useTableUserContext from "../hooks/useTableUserContext";
 import { handleInputChange } from "../utils/helpers";
 import DecimalInput from "./DecimalInput";
 import { PriceRange, Service, Tag } from "./Interfaces";
+import { useNavigate } from "react-router-dom";
 
 interface DisplayServicesProp {
   refresh: boolean;
@@ -47,7 +48,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
   const [image, setImage] = useState<File | null>(null);
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [btnText, setbtnText] = useState<string>("Atualizar");
-  const [prestarServicoBtn, setPrestarServicoBtn] = useState<string>("Prestar Serviço")
+  const [prestarServicoBtn, setPrestarServicoBtn] = useState<string>("Prestar Serviço");
 
   const [editServiceData, setEditServiceData] = useState<Service>({
     ownerId: "",
@@ -69,13 +70,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
 
   const { user } = useTableUserContext();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const [formData, setFormData] = useState({
-    sender: user?.name,
-    reciever: selectedService?.ownerName,
-    to_email: selectedService?.displayEmail,
-    from_name: "Workspace Team",
-  });
+  const navigate = useNavigate();
 
   const cities = [
     "Criciúma",
@@ -93,6 +88,9 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
     "Maracajá",
   ];
 
+  const handleNagivateClaimList = (serviceId: string) => {
+    navigate(`/servicos-provedores/${serviceId}`)
+  }
 
   const handleRefreshFilter = () => {
     setRefreshFilter(!refreshFilter);
@@ -109,7 +107,6 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
   const handleEditTag = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedTag = e.target.value;
 
-    // Update the selectedService state with the new tag
     setEditServiceData((prev) => (prev ? { ...prev, tag: selectedTag } : prev));
     console.log(editServiceData);
   };
@@ -130,7 +127,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
   };
 
   const closeModal = () => {
-    setPrestarServicoBtn("Prestar Serviço")
+    setPrestarServicoBtn("Prestar Serviço");
     setOpenModal(false);
     setEditMode(false);
     setImageURL("");
@@ -169,6 +166,8 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
 
     try {
       const collectionRef = doc(db, "services", selectedService?.id);
+      const docSnap = await getDoc(collectionRef)
+
       let url = editServiceData.image || "";
 
       if (image) {
@@ -180,14 +179,15 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
         console.log("url: ", url);
       }
 
-      const updatedServiceData = {
-        ...editServiceData,
-        image: url,
-        // createdAt: Timestamp.now()
-      };
-      console.log(updatedServiceData);
-
-      await updateDoc(collectionRef, updatedServiceData);
+      if (docSnap.exists()) {        
+        const updatedServiceData = {
+          ...editServiceData,
+          image: url,
+        };
+        console.log(updatedServiceData);
+  
+        await updateDoc(collectionRef, updatedServiceData);
+      }
     } catch (error) {
       console.error("Erro ao dar upload no serviço: ", error);
     } finally {
@@ -217,7 +217,7 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
 
   const handleClaim = async () => {
     try {
-      setPrestarServicoBtn("Enviando e-mail...")
+      setPrestarServicoBtn("Enviando e-mail...");
       if (!selectedService) return;
 
       const formData = {
@@ -227,13 +227,14 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
         from_name: "Workspace Team",
       };
 
-      console.log(formData)
+      console.log(formData);
 
-      const servicesRef = doc(db, "services", selectedService.id)
-      const serviceDoc = await getDoc(servicesRef)
-      
+      const servicesRef = doc(db, "services", selectedService.id);
+      const serviceDoc = await getDoc(servicesRef);
+
       if (serviceDoc.exists()) {
-        const currentProviders = serviceDoc.data()?.potentialProviderArray || [];
+        const currentProviders =
+          serviceDoc.data()?.potentialProviderArray || [];
 
         if (currentProviders.includes(user?.uid)) {
           console.log("Usuário já faz parte do negócio");
@@ -242,17 +243,16 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
       }
 
       const result = await emailjs.send(
-        'service_3tertpg',
-        'template_789zt5r',
+        "service_3tertpg",
+        "template_789zt5r",
         formData,
-        'ZgMc7h4TBYyli2pMM',
+        "ZgMc7h4TBYyli2pMM"
       );
-      console.log(result.text)
-      
-      await updateDoc(servicesRef, {
-        potentialProviderArray: arrayUnion(user?.uid)
-      })
+      console.log(result.text);
 
+      await updateDoc(servicesRef, {
+        potentialProviderArray: arrayUnion(user?.uid),
+      });
     } catch (error) {
       console.error("Erro ao dar claim no serviço: ", error);
     } finally {
@@ -467,36 +467,62 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
               <div className="bg-primary-default rounded-t-lg w-full h-4" />
               <div className="h-full p-2 text-left">
                 <div className="flex flex-row justify-between">
-                  <p className="font-semibold text-2xl max-h-16 line-clamp-2 break-words overflow-hidden text-ellipsis">{service.title}</p>
+                  <p className="font-semibold text-2xl max-h-16 line-clamp-2 break-words overflow-hidden text-ellipsis">
+                    {service.title}
+                  </p>
                   {user?.uid == service.ownerId && (
-                    <button
-                      className="w-6 h-7 hover:scale-110 transition-all"
-                      onClick={() => toggleModalThroughEdit(service)}
-                    >
-                      <svg
-                        className="w-[30px] h-[30px] hover:text-primary-default text-gray-800 dark:text-white"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        fill="none"
-                        viewBox="0 0 24 24"
+                    <div className="flex flex-row gap-2">
+                      <button
+                        className="w-6 h-7 hover:scale-110 transition-all"
+                        onClick={() => handleNagivateClaimList(service.id)}
                       >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
-                        />
-                      </svg>
-                    </button>
+                        <svg
+                          className="w-[30px] h-[30px] hover:text-primary-default text-gray-800 dark:text-white"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-3 5h3m-6 0h.01M12 16h3m-6 0h.01M10 3v4h4V3h-4Z"
+                          />
+                        </svg>
+                      </button>
+                      <button
+                        className="w-6 h-7 hover:scale-110 transition-all"
+                        onClick={() => toggleModalThroughEdit(service)}
+                      >
+                        <svg
+                          className="w-[30px] h-[30px] hover:text-primary-default text-gray-800 dark:text-white"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
+                          />
+                        </svg>
+                      </button>
+                    </div>
                   )}
                 </div>
                 <hr className="bg-primary-default w-full h-1 my-2" />
                 <div className="flex flex-row justify-between">
                   <a
-                    className="font-semibold hover:text-primary-default"
+                    className="font-semibold hover:text-primary-default line-clamp-1 break-words overflow-hidden text-ellipsis"
                     href={`/usuario/${selectedService?.ownerId}`}
                   >
                     por: {service.ownerName}
@@ -591,14 +617,18 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
                     <p className="ml-4 mt-4 text-xl">Valor proposto:</p>
                     {editMode ? (
                       <DecimalInput
-                      type="text"
-                      required
-                      placeholder="0,00"
-                      className="bg-transparent border-0 focus:ring-0 focus:border-0 appearence-none mt-2 w-24 font-semibold text-xl"
-                      value={editServiceData?.value}
-                      onChange={(e) =>
-                        handleInputChange<Service>(e, setEditServiceData, "value")
-                      }
+                        type="text"
+                        required
+                        placeholder="0,00"
+                        className="bg-transparent border-0 focus:ring-0 focus:border-0 appearence-none mt-2 w-24 font-semibold text-xl"
+                        value={editServiceData?.value}
+                        onChange={(e) =>
+                          handleInputChange<Service>(
+                            e,
+                            setEditServiceData,
+                            "value"
+                          )
+                        }
                       />
                     ) : (
                       <p className="bg-transparent border-0 focus:ring-0 focus:border-0 appearence-none ml-3 mt-4 mb-2 w-24 font-semibold text-xl">
@@ -726,7 +756,9 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
                     type="button"
                     onClick={handleClaim}
                   >
-                    <p className="text-white font-semibold">{prestarServicoBtn}</p>
+                    <p className="text-white font-semibold">
+                      {prestarServicoBtn}
+                    </p>
                   </button>
                 </div>
               )}

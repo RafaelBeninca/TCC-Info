@@ -37,6 +37,8 @@ const Usuario: React.FC = () => {
   // const [loading, setLoading] = useState(true);
   const [tags, setTags] = useState<Tag[]>([]);
   const [refresh, setRefresh] = useState<boolean>(false)
+  const [message, setMessage] = useState<string>("")
+  const [btnText, setbtnText] = useState<string>("Atualizar")
 
   const { userId } = useParams<{ userId: string }>();
   const { user, setUser } = useTableUserContext();
@@ -143,10 +145,13 @@ const Usuario: React.FC = () => {
 
     if (authUser) {
       if (!authUser.emailVerified) {
+        setMessage("Um email de verificação foi enviado para você.")
         console.log("Verificação de email enviado.");
         await sendEmailVerification(authUser);
         console.log("Verificação enviada para " + authUser.email);
       } else {
+        setMessage("")
+        setbtnText("Atualizando...")
         let url = data.profilePicture || "";
         if (image) {
           const storageRef = ref(storage, `profilePictures/${uid}.jpg`);
@@ -185,6 +190,7 @@ const Usuario: React.FC = () => {
         }
       }
       await authUser.reload();
+      setbtnText("Atualizar")
     }
   };
 
@@ -340,10 +346,10 @@ const Usuario: React.FC = () => {
                   className="text-sm font-medium p-2 text-textcolor-light focus:outline-none bg-primary-default rounded-lg hover:bg-primary-dark hover:text-textcolor-light focus:z-10 focus:ring-4 focus:ring-gray-100"
                   type="submit"
                 >
-                  Alterar
+                  {btnText}
                 </button>
-                {isVerified && <p>Email has been successfully updated!</p>}
                 {user ? <DeleteAccountBtn /> : <p>No user logged in</p>}
+                {message}
               </div>
             </form>
           </div>

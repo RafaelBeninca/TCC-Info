@@ -238,6 +238,7 @@ const Servicos = () => {
                     <p className="ml-4 mt-2">Tag do serviço:</p>
                     <select className="h-13 w-1/5 ml-4 my-auto border-2 mb-3 bg-transparent border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-primary-default focus:border-primary-default overflow-y-auto hover:shadow-lg transition-all"
                     value={serviceData.tag}
+                    required
                     onChange={handleChangeTag}>
                     <option value=""> Selecione uma tag </option>
                     {tags.map((tag) => (
