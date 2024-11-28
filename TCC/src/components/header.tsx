@@ -74,17 +74,8 @@ const Header = () => {
               </p>
             </div>
           </a>
-          <div className="flex flex-row justify-between bg-transparent w-1/2 h-10 mt-2 border-2 border-primary-default rounded-full">
-          <input className="bg-transparent ml-2 w-full text-lg font-bold focus:border-0 focus:ring-0 text-left"
-          placeholder="Pesquisar nome de usuário..."
-          />
-          <svg className="w-7 h-7 text-primary-default my-auto mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
-          </svg>
-
-          </div>
           <div className="hidden w-full md:block md:w-auto" id="navbar-default">
-            <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+            <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 ml-96 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
               <li>
                 <a
                   href="/servicos"

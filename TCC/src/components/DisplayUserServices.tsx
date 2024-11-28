@@ -591,6 +591,7 @@ const DisplayUserServices = () => {
               )}
               {selectedService?.ownerId !== user?.uid && (
                 <div className="flex align-middle justify-center w-full">
+                  {selectedService?.claimedId == "" ? (
                   <button
                     className="bg-orange-500 hover:bg-orange-700 rounded-lg h-9 w-2/3 mr-10 mt-20 mb-3"
                     type="button"
@@ -600,6 +601,9 @@ const DisplayUserServices = () => {
                       {prestarServicoBtn}
                     </p>
                   </button>
+                  ) : (
+                    <p>Este serviço já tem um prestador aceito</p>
+                  )}
                 </div>
               )}
             </div>

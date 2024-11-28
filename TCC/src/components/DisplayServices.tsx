@@ -167,9 +167,11 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
     try {
       const collectionRef = doc(db, "services", selectedService?.id);
       const docSnap = await getDoc(collectionRef)
+      if (!docSnap) return;
 
+      
       let url = editServiceData.image || "";
-
+      
       if (image) {
         const id = uuidv4();
         const storageRef = ref(storage, `serviceImages/${id}.jpg`);
@@ -291,7 +293,10 @@ const DisplayServices: React.FC<DisplayServicesProp> = ({ refresh }) => {
       setError(null);
       try {
         const productCollection = collection(db, "services");
-        let q = query(productCollection, where("status", "!=", "Prestado"));
+        let q = query(productCollection,
+          where("status", "!=", "Prestado"),
+          where("claimedId", "==", "")
+        );
 
         if (order) {
           // Ordem decrescente / crescente
